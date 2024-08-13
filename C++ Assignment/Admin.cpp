@@ -3,11 +3,5 @@
 #include <string>
 
 int admin(){
-
-}
-
-
-int main() {
-	admin();
-	return 0;
+	
 }
