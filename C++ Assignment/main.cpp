@@ -1,19 +1,26 @@
 #include <iostream>
-#include <string>
 #include <iomanip>
+#include <string>
 #include <cmath>
 using namespace std;
 
 // Function prototypes
-void logo();
+void newPageLogo();
+void pauseEnter();
 void mainMenu();
 void aboutUs();
 void customerLogin();
+void adminLogin();
 void viewServiceExpert();
-void admin();
+void goMenuOrViewSE();
 
-void logo() {
-    // Logo for beauty service (hair salon)
+
+// Global variables & constants (if any)
+
+
+void newPageLogo() {
+    // Create a new page by clearing the screen and diplay a logo on top
+    system("cls"); // Use "clear" on Unix-like systems
     cout << "=================================================================================================================\n";
     cout << "|| ##     ##    ###    ##     ## ######## ##    ##     ######     ###    ##        #######   #######  ##    ## ||\n";
     cout << "|| ##     ##   ## ##   ##     ## ##       ###   ##    ##    ##   ## ##   ##       ##     ## ##     ## ###   ## ||\n";
@@ -25,9 +32,16 @@ void logo() {
     cout << "=================================================================================================================\n\n";
 }
 
-void mainMenu() {
-    char option;
+void pauseEnter() {
+    char pause;
+    cin.get(pause); // Pause by prompting an input (use string & getline in case user typed in anything)
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignore all characters up to the newline
+}
 
+void mainMenu() {
+    // First Interface
+    char option;
+    newPageLogo();
     cout << "--------------------MAIN MENU--------------------\n";
     cout << "WELCOME TO HAVEN SALOON\n";
     cout << "Please choose your option.\n\n";
@@ -39,38 +53,31 @@ void mainMenu() {
 
     cout << "Enter your choice:\t";
     cin >> option;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignore all characters up to the newline
 
     switch (option) {
     case 'A': case 'a':
-        system("cls"); // Use "clear" on Unix-like systems
-        logo();
         aboutUs();
         break;
     case 'B': case 'b':
-        system("cls");
-        logo();
         customerLogin();
         break;
     case 'C': case 'c':
-        system("cls");
-        logo();
-        cout << "You chose an option of Admin Login\n";
+        adminLogin();
         break;
     case 'D': case 'd':
-        exit(0);
-    default:
-        system("cls");
-        logo();
-        mainMenu(); // Return to main menu for a retry
-        cout << "Invalid option, Please try again!";
         break;
+    default:
+        cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
+        pauseEnter();
+        mainMenu(); // Return to main menu for a retry
     }
 }
 
 void aboutUs() {
     char returnMenu;
-
-    // Implementation for About Us
+    newPageLogo();
+    // About Us Page
     cout << "--------------------------------------------------------------------------ABOUT US--------------------------------------------------------------------------\n";
     cout << "Welcome to Haven Saloon, where we provide a comfortable environment to experience and enjoy high-quality haircut services.\n";
     cout << "Our high-quality services are designed to ensure your satisfaction.\n\n";
@@ -78,25 +85,14 @@ void aboutUs() {
     cout << "We are friendly and will listen to your needs to provide personalized advice, offering a range of stylish looks to meet your requirements.\n";
     cout << "Whether it's styling, coloring, or shampooing, we use high-quality products to ensure the best results.\n\n";
     cout << "Experience the warm and friendly atmosphere at Haven Saloon and let us provide you with caring service. We strive to make every visit a relaxing and enjoyable experience.\n\n";
-    cout << "Enter M return to the main menu:\t";
+    cout << "Enter any key to return to the main menu:\t";
     cin >> returnMenu;
-
-    if (returnMenu == 'M' || returnMenu == 'm') {
-        system("cls");
-        logo();
-        mainMenu();
-    }
-    else {
-        system("cls");
-        logo();
-        aboutUs(); // Return to About Us for a retry
-        cout << "Invalid option, Please try again!";
-    }
+    mainMenu();
 }
 
 void customerLogin() {
     char option;
-
+    newPageLogo();
     cout << "--------CUSTOMER HOMEPAGE--------\n";
     cout << "Welcome User!\n";
     cout << "Please choose your option.\n";
@@ -110,49 +106,38 @@ void customerLogin() {
 
     cout << "Enter your choice:\t";
     cin >> option;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     switch (option) {
     case 'A': case 'a':
-        system("cls");
-        logo();
         viewServiceExpert();
         break;
     case 'B': case 'b':
-        system("cls");
-        logo();
         cout << "You chose an option of Make Bookings\n";
         break;
     case 'C': case 'c':
-        system("cls");
-        logo();
         cout << "You chose an option of My bookings\n";
         break;
     case 'D': case 'd':
-        system("cls");
-        logo();
         cout << "You chose an option of View Schedule\n";
         break;
     case 'E': case 'e':
-        system("cls");
-        logo();
         cout << "You chose an option of Feedback Form\n";
         break;
     case 'F': case 'f':
-        system("cls");
-        logo();
         mainMenu();
         break;
     default:
-        system("cls");
-        logo();
+        cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
+        pauseEnter();
         customerLogin(); // Return to customer login for a retry
-        cout << "Invalid option, Please try again!";
-        break;
     }
 }
 
+
 void viewServiceExpert() {
     char option;
+    newPageLogo();
     cout << "--------VIEW SERVICE & EXPERT--------\n";
     cout << "Please choose your option.\n";
     cout << "A\t: View Service\n";
@@ -160,71 +145,46 @@ void viewServiceExpert() {
     cout << "C\t: Return to Customer Homepage\n";
     cout << "Enter your choice:\t";
     cin >> option;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     switch (option) {
     case 'A': case 'a':
-        system("cls");
-        logo();
+
+        newPageLogo();
         cout << "--------OUR SERVICE--------\n";
         cout << "1. Hair Cut\n";
         cout << "2. Hair Wash\n";
         cout << "3. Hair Dying\n\n";
-        cout << "Enter M return to the MAIN MENU OR enter any key return to VIEW SERVICE & EXPERT:\t";
-        char returnMenu;
-        cin >> returnMenu;
-        if (returnMenu == 'M' || returnMenu == 'm') {
-            system("cls");
-            logo();
-            mainMenu();
-        }
-        else {
-            system("cls");
-            logo();
-            viewServiceExpert(); // Return to viewServiceExpert for a retry
-            cout << "Invalid option, Please try again!";
-        }
+        cout << "Press enter to return:\t";
+        pauseEnter();
+        viewServiceExpert(); // Return to customer login for a retry
         break;
     case 'B': case 'b':
-        system("cls");
-        logo();
+        newPageLogo();
         cout << "--------OUR EXPERT--------\n";
         cout << "1. Alice Wong\n";
         cout << "2. Bernice Lim\n";
         cout << "3. Catherine Tan\n\n";
-        cout << "Enter M return to the MAIN MENU OR enter any key return to VIEW SERVICE & EXPERT:\t";
-        cin >> returnMenu;
-        if (returnMenu == 'M' || returnMenu == 'm') {
-            system("cls");
-            logo();
-            mainMenu();
-        }
-        else {
-            system("cls");
-            logo();
-            viewServiceExpert(); // Return to viewServiceExpert for a retry
-            cout << "Invalid option, Please try again!";
-        }
+        cout << "Press enter to return\t";
+        pauseEnter();
+        viewServiceExpert(); // Return to customer login for a retry
         break;
     case 'C': case 'c':
-        system("cls");
-        logo();
         customerLogin();
         break;
     default:
-        system("cls");
-        logo();
-        viewServiceExpert(); // Return to viewServiceExpert for a retry
-        cout << "Invalid option, Please try again!";
-        break;
+        cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
+        pauseEnter();
+        viewServiceExpert();
     }
 }
 
-void admin() {
-
+void adminLogin() {
+    newPageLogo();
+    cout << "ADMIN LOGIN";
 }
 
 int main() {
-    logo(); // Display the logo
     mainMenu(); // Start the menu
     return 0;
 }
