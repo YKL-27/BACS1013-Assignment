@@ -9,17 +9,15 @@ void newPageLogo();
 void pauseEnter();
 void mainMenu();
 void aboutUs();
-void customerLogin();
+void customerPage();
 void adminLogin();
 void viewServiceExpert();
-void goMenuOrViewSE();
-
 
 // Global variables & constants (if any)
 
 
 void newPageLogo() {
-    // Create a new page by clearing the screen and diplay a logo on top
+    // Create a new page by clearing the screen and displaying a logo on top
     system("cls"); // Use "clear" on Unix-like systems
     cout << "=================================================================================================================\n";
     cout << "|| ##     ##    ###    ##     ## ######## ##    ##     ######     ###    ##        #######   #######  ##    ## ||\n";
@@ -37,6 +35,7 @@ void pauseEnter() {
     cin.get(pause); // Pause by prompting an input (use string & getline in case user typed in anything)
     cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignore all characters up to the newline
 }
+
 
 void mainMenu() {
     // First Interface
@@ -60,7 +59,7 @@ void mainMenu() {
         aboutUs();
         break;
     case 'B': case 'b':
-        customerLogin();
+        customerPage();
         break;
     case 'C': case 'c':
         adminLogin();
@@ -75,22 +74,21 @@ void mainMenu() {
 }
 
 void aboutUs() {
-    char returnMenu;
     newPageLogo();
     // About Us Page
     cout << "--------------------------------------------------------------------------ABOUT US--------------------------------------------------------------------------\n";
     cout << "Welcome to Haven Saloon, where we provide a comfortable environment to experience and enjoy high-quality haircut services.\n";
     cout << "Our high-quality services are designed to ensure your satisfaction.\n\n";
     cout << "At Haven Saloon, our team of professional hairstylists has many years of experience and is committed to using the latest sustainable techniques and trends.\n";
-    cout << "We are friendly and will listen to your needs to provide personalized advice, offering a range of stylish looks to meet your requirements.\n";
-    cout << "Whether it's styling, coloring, or shampooing, we use high-quality products to ensure the best results.\n\n";
+    cout << "We are friendly and will listen to your needs to provide personalised advice, offering a range of stylish looks to meet your requirements.\n";
+    cout << "Whether it's styling, colouring, or shampooing, we use high-quality products to ensure the best results.\n\n";
     cout << "Experience the warm and friendly atmosphere at Haven Saloon and let us provide you with caring service. We strive to make every visit a relaxing and enjoyable experience.\n\n";
     cout << "Enter any key to return to the main menu:\t";
-    cin >> returnMenu;
+    pauseEnter();
     mainMenu();
 }
 
-void customerLogin() {
+void customerPage() {
     char option;
     newPageLogo();
     cout << "--------CUSTOMER HOMEPAGE--------\n";
@@ -130,7 +128,7 @@ void customerLogin() {
     default:
         cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
         pauseEnter();
-        customerLogin(); // Return to customer login for a retry
+        customerPage(); // Return to customer login for a retry
     }
 }
 
@@ -170,7 +168,7 @@ void viewServiceExpert() {
         viewServiceExpert(); // Return to customer login for a retry
         break;
     case 'C': case 'c':
-        customerLogin();
+        customerPage();
         break;
     default:
         cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
