@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <fstream>
+#include <sstream>
 #include <cmath>
 using namespace std;
 
@@ -9,6 +11,8 @@ void newPageLogo();
 void pauseEnter();
 void mainMenu();
 void aboutUs();
+void regisPage();
+void customerLogin();
 void customerPage();
 void adminLogin();
 void viewServiceExpert();
@@ -35,7 +39,6 @@ void pauseEnter() {
     cin.get(pause); // Pause by prompting an input (use string & getline in case user typed in anything)
     cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignore all characters up to the newline
 }
-
 
 void mainMenu() {
     // First Interface
@@ -131,7 +134,6 @@ void customerPage() {
         customerPage(); // Return to customer login for a retry
     }
 }
-
 
 void viewServiceExpert() {
     char option;
