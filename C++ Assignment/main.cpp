@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <conio.h>
 using namespace std;
 
 // Function prototypes
@@ -19,6 +20,12 @@ void viewServiceExpert();
 
 // Global variables & constants (if any)
 
+struct userType{
+    int id;
+    string username;
+    string password;
+    bool admin;
+};
 
 void newPageLogo() {
     // Create a new page by clearing the screen and displaying a logo on top
@@ -62,7 +69,7 @@ void mainMenu() {
         aboutUs();
         break;
     case 'B': case 'b':
-        customerPage();
+        customerLogin();
         break;
     case 'C': case 'c':
         adminLogin();
@@ -89,6 +96,25 @@ void aboutUs() {
     cout << "Enter any key to return to the main menu:\t";
     pauseEnter();
     mainMenu();
+}
+
+void customerLogin() {
+    newPageLogo();
+    string inputUsername="", inputPassword="";
+    char ch;
+    cout << "Enter your username:\t";
+    getline(cin, inputUsername);
+    cout << "\nEnter your password:\t";
+    ch = _getch();
+    while (ch != 13) {//character 13 is enter
+        inputPassword.push_back(ch);
+        cout << '*';
+        ch = _getch();
+    }
+
+
+   
+
 }
 
 void customerPage() {
