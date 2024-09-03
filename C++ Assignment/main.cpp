@@ -12,7 +12,7 @@ void newPageLogo();
 void pauseEnter();
 void mainMenu();
 void aboutUs();
-void regisPage();
+void registerPage();
 void customerLogin();
 void customerPage();
 void adminLogin();
@@ -59,8 +59,9 @@ void mainMenu() {
     // Main Menu options
     cout << "A\t: About Us\n";
     cout << "B\t: Customer Login\n";
-    cout << "C\t: Admin Login\n";
-    cout << "D\t: Exit\n\n";
+    cout << "C\t: Register\n";
+    cout << "D\t: Admin Login\n";
+    cout << "E\t: Exit\n\n";
 
     cout << "Enter your choice:\t";
     cin >> option;
@@ -74,9 +75,12 @@ void mainMenu() {
         customerLogin();
         break;
     case 'C': case 'c':
-        adminLogin();
+        registerPage();
         break;
     case 'D': case 'd':
+        adminLogin();
+        break;
+    case 'E': case 'e':
         break;
     default:
         cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
@@ -100,26 +104,18 @@ void aboutUs() {
     mainMenu();
 }
 
+void registerPage(){}
+
 void customerLogin() {
     newPageLogo();
-    string inputUsername="", inputPassword="";
-    cout << "Enter your username:\t";
-    getline(cin, inputUsername);
-    cout << "\nEnter your password:\t";
-    char ch;
-    ch = _getch();
-    while (ch != 13) {//character 13 is enter
-        inputPassword.push_back(ch);
-        cout << '*';
-        ch = _getch();
-    }
-    const string filename = "users.dat";
+    // Read file
     userType users[100];
 
-    ifstream infile(filename);
+    ifstream infile(FILE_USER);
     if (!infile) {
-        cout << "File could not be opened!" << endl;
-        return;
+        cout << "\n\nUnable to login currently due to error\nPress enter to return to main menu\t";
+        pauseEnter();
+        mainMenu();
     }
 
     string record;
@@ -143,29 +139,44 @@ void customerLogin() {
         counter++;
     }
     infile.close();
-
-    //for (int i = 0; i < counter; i++) {
-        //cout << "User " << i + 1 << ":\n";
-        //cout << "ID: " << users[i].id << endl;
-        //cout << "Username: " << users[i].username << endl;
-        //cout << "Password: " << users[i].password << endl;
-        //cout << "Admin: " << users[i].admin << endl << endl;
-    //}
-    bool recordFound = 0;
-    for (int i = 0; i < counter; i++) {
-        if (inputUsername == users[i].username && inputPassword == users[i].password) {
-            recordFound = 1;
-            break;
+    bool recordFound = false;
+    bool loop = true;
+    do {
+        newPageLogo();
+        string inputUsername = "", inputPassword = "";
+        cout << "Enter your username:\t";
+        getline(cin, inputUsername);
+        cout << "\nEnter your password:\t";
+        char ch;
+        ch = _getch();
+        while (ch != 13) {//character 13 is enter
+            inputPassword.push_back(ch);
+            cout << '*';
+            ch = _getch();
         }
-    }
 
-    if (recordFound) {
-        cout << "\n\nAccess granted";
-    }
-    else {
-        cout << "\n\nAccess denied";
-    }
 
+        for (int i = 0; i < counter; i++) {
+            if (inputUsername == users[i].username && inputPassword == users[i].password) {
+                recordFound = true;
+                break;
+            }
+        }
+        if (recordFound) {
+            cout << "\n\nAccess granted\nPress enter to continue\t";
+            loop = false;
+            pauseEnter();
+            customerPage();
+        }
+        else {
+            char option;
+            cout << "\n\nAccess denied\nDo you wish to continue? (Y/N)\n\t";
+            cin >> option;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            loop = (toupper(option) == 'Y') ? true : false;
+        }
+    } while (loop);
+    mainMenu();
 }
 
 void customerPage() {
