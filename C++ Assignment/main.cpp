@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <vector>
 #include <conio.h>
 using namespace std;
 
@@ -19,13 +20,47 @@ void adminLogin();
 void viewServiceExpert();
 
 // Global variables & constants (if any)
+#define FILE_USER "users.dat"
+#define FILE_SCHEDULE "schedule.dat"
 
-struct userType{
+struct userType {
     int id;
     string username;
     string password;
     bool admin;
 };
+
+vector<userType> readSavefile(string filename) {
+    ifstream infile(filename);
+    vector<userType> users;
+    
+    if (!infile) {
+        cerr << "File could not be opened!" << endl;
+        return users; // Return an empty vector if the file can't be opened
+    }
+
+    string record;
+    while (getline(infile, record)) {
+        stringstream ss(record);
+        string id, username, password, status;
+        userType user;
+
+        getline(ss, id, ',');
+        getline(ss, username, ',');
+        getline(ss, password, ',');
+        getline(ss, status, ',');
+
+        user.id = stoi(id);         
+        user.username = username;
+        user.password = password;
+        user.admin = stoi(status);  
+
+        users.push_back(user);  // Add the user to the vector
+    }
+
+    infile.close(); // Close the file
+    return users;   // Return the filled vector
+}
 
 void newPageLogo() {
     // Create a new page by clearing the screen and displaying a logo on top
@@ -101,10 +136,10 @@ void aboutUs() {
 void customerLogin() {
     newPageLogo();
     string inputUsername="", inputPassword="";
-    char ch;
     cout << "Enter your username:\t";
     getline(cin, inputUsername);
     cout << "\nEnter your password:\t";
+    char ch;
     ch = _getch();
     while (ch != 13) {//character 13 is enter
         inputPassword.push_back(ch);
@@ -112,8 +147,12 @@ void customerLogin() {
         ch = _getch();
     }
 
+    vector<userType> users = readSavefile(FILE_USER);
 
-   
+    for (const userType& user : users) {
+        cout << "ID: " << user.id << ", Username: " << user.username
+            << ", Password: " << user.password << ", Admin: " << user.admin << endl;
+    }
 
 }
 
