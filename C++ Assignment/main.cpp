@@ -4,7 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include <vector>
 #include <conio.h>
 using namespace std;
 
@@ -24,43 +23,11 @@ void viewServiceExpert();
 #define FILE_SCHEDULE "schedule.dat"
 
 struct userType {
-    int id;
-    string username;
-    string password;
-    bool admin;
+    int id = 0;
+    string username = "";
+    string password = "";
+    bool admin = 0;
 };
-
-vector<userType> readSavefile(string filename) {
-    ifstream infile(filename);
-    vector<userType> users;
-    
-    if (!infile) {
-        cerr << "File could not be opened!" << endl;
-        return users; // Return an empty vector if the file can't be opened
-    }
-
-    string record;
-    while (getline(infile, record)) {
-        stringstream ss(record);
-        string id, username, password, status;
-        userType user;
-
-        getline(ss, id, ',');
-        getline(ss, username, ',');
-        getline(ss, password, ',');
-        getline(ss, status, ',');
-
-        user.id = stoi(id);         
-        user.username = username;
-        user.password = password;
-        user.admin = stoi(status);  
-
-        users.push_back(user);  // Add the user to the vector
-    }
-
-    infile.close(); // Close the file
-    return users;   // Return the filled vector
-}
 
 void newPageLogo() {
     // Create a new page by clearing the screen and displaying a logo on top
@@ -146,12 +113,57 @@ void customerLogin() {
         cout << '*';
         ch = _getch();
     }
+    const string filename = "users.dat";
+    userType users[100];
 
-    vector<userType> users = readSavefile(FILE_USER);
+    ifstream infile(filename);
+    if (!infile) {
+        cout << "File could not be opened!" << endl;
+        return;
+    }
 
-    for (const userType& user : users) {
-        cout << "ID: " << user.id << ", Username: " << user.username
-            << ", Password: " << user.password << ", Admin: " << user.admin << endl;
+    string record;
+    int counter = 0;
+    while (getline(infile, record)) {
+        stringstream ss(record);
+        string id, username, password, status;
+        userType user;
+
+        getline(ss, id, ',');
+        getline(ss, username, ',');
+        getline(ss, password, ',');
+        getline(ss, status, ',');
+
+        user.id = stoi(id);
+        user.username = username;
+        user.password = password;
+        user.admin = stoi(status);
+
+        users[counter] = user;
+        counter++;
+    }
+    infile.close();
+
+    //for (int i = 0; i < counter; i++) {
+        //cout << "User " << i + 1 << ":\n";
+        //cout << "ID: " << users[i].id << endl;
+        //cout << "Username: " << users[i].username << endl;
+        //cout << "Password: " << users[i].password << endl;
+        //cout << "Admin: " << users[i].admin << endl << endl;
+    //}
+    bool recordFound = 0;
+    for (int i = 0; i < counter; i++) {
+        if (inputUsername == users[i].username && inputPassword == users[i].password) {
+            recordFound = 1;
+            break;
+        }
+    }
+
+    if (recordFound) {
+        cout << "\n\nAccess granted";
+    }
+    else {
+        cout << "\n\nAccess denied";
     }
 
 }
