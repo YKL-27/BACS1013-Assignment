@@ -4,19 +4,32 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-#include <conio.h>
+//#include <conio.h>
+#include <cstdlib>
+#include <vector>
+#include <ctime>
 using namespace std;
 
 // Function prototypes
 void newPageLogo();
 void pauseEnter();
 void mainMenu();
-void aboutUs();
+void aboutUsPage();
 void registerPage();
+bool registerUsernameAvailable(string username);
 void customerLogin();
 void customerPage();
 void adminLogin();
-void viewServiceExpert();
+void adminPage();
+void serviceExpertPage();
+void makeBooking();
+string selectService();
+string selectExpert();
+string selectTimeSlot();
+string selectPaymentMode();
+int getChoice(const vector<string>& options);
+string autoAssignExpert();
+
 
 // Global variables & constants (if any)
 #define FILE_USER "users.dat"
@@ -29,8 +42,8 @@ struct userType {
     bool admin = 0;
 };
 
+// Create a new page by clearing the screen and displaying a logo on top
 void newPageLogo() {
-    // Create a new page by clearing the screen and displaying a logo on top
     system("cls"); // Use "clear" on Unix-like systems
     cout << "=================================================================================================================\n";
     cout << "|| ##     ##    ###    ##     ## ######## ##    ##     ######     ###    ##        #######   #######  ##    ## ||\n";
@@ -43,12 +56,14 @@ void newPageLogo() {
     cout << "=================================================================================================================\n\n";
 }
 
+// Pause by prompting an input (use string & getline in case user typed in anything)
 void pauseEnter() {
     char pause;
-    cin.get(pause); // Pause by prompting an input (use string & getline in case user typed in anything)
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignore all characters up to the newline
+    cin.get(pause); 
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignore all characters up to the newline incase values are entered
 }
 
+// Menu page
 void mainMenu() {
     // First Interface
     char option;
@@ -69,7 +84,7 @@ void mainMenu() {
 
     switch (option) {
     case 'A': case 'a':
-        aboutUs();
+        aboutUsPage();
         break;
     case 'B': case 'b':
         customerLogin();
@@ -89,9 +104,9 @@ void mainMenu() {
     }
 }
 
-void aboutUs() {
+// About Us Page
+void aboutUsPage() {
     newPageLogo();
-    // About Us Page
     cout << "--------------------------------------------------------------------------ABOUT US--------------------------------------------------------------------------\n";
     cout << "Welcome to Haven Saloon, where we provide a comfortable environment to experience and enjoy high-quality haircut services.\n";
     cout << "Our high-quality services are designed to ensure your satisfaction.\n\n";
@@ -104,16 +119,12 @@ void aboutUs() {
     mainMenu();
 }
 
-void registerPage(){}
-
-void customerLogin() {
-    newPageLogo();
-    // Read file
+bool registerUsernameAvailable(string username) {
     userType users[100];
 
     ifstream infile(FILE_USER);
     if (!infile) {
-        cout << "\n\nUnable to login currently due to error\nPress enter to return to main menu\t";
+        cout << "\n\nUnable to login currently due to system error\nPress enter to return to main menu\t";
         pauseEnter();
         mainMenu();
     }
@@ -139,6 +150,90 @@ void customerLogin() {
         counter++;
     }
     infile.close();
+
+    for (int i = 0; i < counter; i++) {
+        if (username == users[i].username) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// User (customer) Registration Page
+void registerPage() {
+    newPageLogo();
+    // Read file
+    bool loop = true;
+    do {
+        newPageLogo();
+        string inputUsername = "", inputPassword = "";
+        cout << "Enter a new username:\t";
+        getline(cin, inputUsername);
+        cout << "\nEnter a new password:\t";
+        getline(cin, inputPassword);
+        /*
+        char ch;
+        ch = _getch();
+        while (ch != 13) {//character 13 is enter
+            inputPassword.push_back(ch);
+            cout << '*';
+            ch = _getch();
+        }
+        */
+
+        if (registerUsernameAvailable(inputUsername)) {
+            cout << "\n\nRegistred successful\nPress enter to continue\t";
+            loop = false;
+            pauseEnter();
+            customerPage();
+        }
+        else {
+            char option;
+            cout << "\n\nUsername taken\nDo you wish to continue? (Y/N)\n\t";
+            cin >> option;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            loop = (toupper(option) == 'Y') ? true : false;
+        }
+    } while (loop);
+    mainMenu();
+
+}
+
+// Customer Login Page
+void customerLogin() {
+    newPageLogo();
+    // Read file
+    userType users[100];
+
+    ifstream infile(FILE_USER);
+    if (!infile) {
+        cout << "\n\nUnable to login currently due to system error\nPress enter to return to main menu\t";
+        pauseEnter();
+        mainMenu();
+    }
+
+    string record;
+    int counter = 0;
+    while (getline(infile, record)) {
+        stringstream ss(record);
+        string id, username, password, status;
+        userType user;
+
+        getline(ss, id, ',');
+        getline(ss, username, ',');
+        getline(ss, password, ',');
+        getline(ss, status, ',');
+
+        user.id = stoi(id);
+        user.username = username;
+        user.password = password;
+        user.admin = stoi(status);
+
+        users[counter] = user;
+        counter++;
+    }
+    infile.close();
+
     bool recordFound = false;
     bool loop = true;
     do {
@@ -147,6 +242,8 @@ void customerLogin() {
         cout << "Enter your username:\t";
         getline(cin, inputUsername);
         cout << "\nEnter your password:\t";
+        getline(cin, inputPassword);
+        /*
         char ch;
         ch = _getch();
         while (ch != 13) {//character 13 is enter
@@ -154,6 +251,7 @@ void customerLogin() {
             cout << '*';
             ch = _getch();
         }
+        */
 
 
         for (int i = 0; i < counter; i++) {
@@ -179,6 +277,7 @@ void customerLogin() {
     mainMenu();
 }
 
+// Customer Main Page
 void customerPage() {
     char option;
     newPageLogo();
@@ -199,10 +298,10 @@ void customerPage() {
 
     switch (option) {
     case 'A': case 'a':
-        viewServiceExpert();
+        serviceExpertPage();
         break;
     case 'B': case 'b':
-        cout << "You chose an option of Make Bookings\n";
+        makeBooking();
         break;
     case 'C': case 'c':
         cout << "You chose an option of My bookings\n";
@@ -223,7 +322,8 @@ void customerPage() {
     }
 }
 
-void viewServiceExpert() {
+// Customer > view Service & Expert
+void serviceExpertPage() {
     char option;
     newPageLogo();
     cout << "--------VIEW SERVICE & EXPERT--------\n";
@@ -245,7 +345,7 @@ void viewServiceExpert() {
         cout << "3. Hair Dying\n\n";
         cout << "Press enter to return:\t";
         pauseEnter();
-        viewServiceExpert(); // Return to customer login for a retry
+        serviceExpertPage(); // Return to customer login for a retry
         break;
     case 'B': case 'b':
         newPageLogo();
@@ -255,7 +355,7 @@ void viewServiceExpert() {
         cout << "3. Catherine Tan\n\n";
         cout << "Press enter to return\t";
         pauseEnter();
-        viewServiceExpert(); // Return to customer login for a retry
+        serviceExpertPage(); // Return to customer login for a retry
         break;
     case 'C': case 'c':
         customerPage();
@@ -263,8 +363,100 @@ void viewServiceExpert() {
     default:
         cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
         pauseEnter();
-        viewServiceExpert();
+        serviceExpertPage();
     }
+}
+
+//For the customer menu interface
+int getChoice(const vector<string>& options) {
+    int choice;
+    for (int i = 0; i < options.size(); ++i) {
+        cout << i + 1 << ". " << options[i] << endl;
+    }
+    cout << "Enter your choice: ";
+    while (!(cin >> choice) || choice < 1 || choice > options.size()) {
+        cout << "Invalid choice. Please enter a number between 1 and " << options.size() << ": ";
+    }
+    return choice;
+}
+
+// Customer > Make Booking > Select Service
+string selectService() {
+    newPageLogo();
+    vector<string> services = { "Hair Cut", "Hair Wash", "Hair Dying" };
+    cout << "--------SELECT A SERVICE--------\n";
+    int choice = getChoice(services);
+    return services[choice - 1];
+}
+
+// Customer > Make Booking > Select Service > Select Expert
+string selectExpert() {
+    newPageLogo();
+    vector<string> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan", "Auto-assign" };
+    cout << "--------SELECT AN EXPERT--------\n";
+    int choice = getChoice(experts);
+    if (choice == 4) {
+        return autoAssignExpert();
+    }
+    return experts[choice - 1];
+}
+
+// Customer > Make Booking > Select Service > Select Expert (random assign expert function)
+string autoAssignExpert() {
+    vector<string> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
+    srand(time(0));
+    int index = rand() % experts.size();
+    return experts[index];
+}
+
+// Customer > Make Booking > Select Service > Select Expert > Select Time Slot
+string selectTimeSlot() {
+    newPageLogo();
+    vector<string> timeSlots = { "10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM" };
+    cout << "--------SELECT A TIME SLOT--------\n";
+    int choice = getChoice(timeSlots);
+    return timeSlots[choice - 1];
+}
+
+// Customer > Make Booking > Select Service > Select Expert > Select Time Slot > Select Payment Mode
+string selectPaymentMode() {
+    newPageLogo();
+    vector<string> paymentModes = { "Credit Card", "Debit Card", "Cash" };
+    cout << "--------SELECT A PAYMENT MODE--------\n";
+    int choice = getChoice(paymentModes);
+    return paymentModes[choice - 1];
+}
+
+// Customer > Make Booking
+void makeBooking() {
+    string service, expert, timeSlot, paymentMode;
+    service = selectService();
+    expert = selectExpert();
+    timeSlot = selectTimeSlot();
+    paymentMode = selectPaymentMode();
+
+    //Summary of the booking 
+    newPageLogo();
+    cout << "--------BOOKING CONFIRMATION--------\n";
+    cout << "Service: " << service << endl;
+    cout << "Expert: " << expert << endl;
+    cout << "Time Slot: " << timeSlot << endl;
+    cout << "Payment Mode: " << paymentMode << endl;
+    cout << "Confirm your booking (Y/N): ";
+    char confirm;
+    cin >> confirm;
+
+    //Confirm the booking 
+    if (confirm == 'Y' || confirm == 'y') {
+        cout << "Your booking has been confirmed!" << endl;
+        cout << "Press Enter For going back to customer page...";
+    }
+    else {
+        cout << "Booking canceled." << endl;
+        cout << "Press Enter For going back to customer page...";
+    }
+    pauseEnter();
+    customerPage();
 }
 
 void adminLogin() {
@@ -276,3 +468,14 @@ int main() {
     mainMenu(); // Start the menu
     return 0;
 }
+
+
+//user.dat (put in the same directory as the cpp file)
+/*
+1,YKLiang,abc1234,1
+2,QiXian,xyz456,0
+3,WeiSheng,rsd1101,0
+4,ZhiQiang,123456,0
+*/
+
+
