@@ -13,15 +13,19 @@ using namespace std;
 // Function prototypes
 void newPageLogo();
 void pauseEnter();
+
 void mainMenu();
 void aboutUsPage();
+
 void registerPage();
 bool registerUsernameAvailable(string username);
 void customerLogin();
+
 void customerPage();
 void adminLogin();
 void adminPage();
 void serviceExpertPage();
+
 void makeBooking();
 string selectService();
 string selectExpert();
@@ -36,7 +40,6 @@ string autoAssignExpert();
 #define FILE_SCHEDULE "schedule.dat"
 
 struct userType {
-    int id = 0;
     string username = "";
     string password = "";
     bool admin = 0;
@@ -119,6 +122,9 @@ void aboutUsPage() {
     mainMenu();
 }
 
+
+// FILE READ------------------------------------------------------------------------------------------------------------------------------------------------------
+// Check if username met in registration
 bool registerUsernameAvailable(string username) {
     userType users[100];
 
@@ -133,18 +139,14 @@ bool registerUsernameAvailable(string username) {
     int counter = 0;
     while (getline(infile, record)) {
         stringstream ss(record);
-        string id, username, password, status;
+        string username, password;
         userType user;
 
-        getline(ss, id, ',');
         getline(ss, username, ',');
         getline(ss, password, ',');
-        getline(ss, status, ',');
 
-        user.id = stoi(id);
         user.username = username;
         user.password = password;
-        user.admin = stoi(status);
 
         users[counter] = user;
         counter++;
@@ -157,6 +159,23 @@ bool registerUsernameAvailable(string username) {
         }
     }
     return true;
+}
+
+void addNewUserToFile(userType new_user) {
+    // Create a record in CSV-like format
+    string record = new_user.username + ',' + new_user.password;
+    cout << record << endl;  // Display the record for debugging
+
+    ofstream outFile(FILE_USER, ios::app); // Open file in append mode
+
+    if (!outFile) {
+        cout << "Sorry, an error occurred while opening the file.";
+        return;
+    }
+
+    // Write the new user's data to the file
+    outFile << record << "\n";  // Add a newline after the record
+    outFile.close();
 }
 
 // User (customer) Registration Page
@@ -182,6 +201,9 @@ void registerPage() {
         */
 
         if (registerUsernameAvailable(inputUsername)) {
+
+            userType new_user = {inputUsername, inputPassword};
+            addNewUserToFile(new_user);
             cout << "\n\nRegistred successful\nPress enter to continue\t";
             loop = false;
             pauseEnter();
@@ -216,18 +238,14 @@ void customerLogin() {
     int counter = 0;
     while (getline(infile, record)) {
         stringstream ss(record);
-        string id, username, password, status;
+        string username, password;
         userType user;
 
-        getline(ss, id, ',');
         getline(ss, username, ',');
         getline(ss, password, ',');
-        getline(ss, status, ',');
 
-        user.id = stoi(id);
         user.username = username;
         user.password = password;
-        user.admin = stoi(status);
 
         users[counter] = user;
         counter++;
@@ -255,6 +273,7 @@ void customerLogin() {
 
 
         for (int i = 0; i < counter; i++) {
+            cout << endl << users[i].username << "       " << users[i].password;
             if (inputUsername == users[i].username && inputPassword == users[i].password) {
                 recordFound = true;
                 break;
@@ -277,6 +296,8 @@ void customerLogin() {
     mainMenu();
 }
 
+
+// CUSTOMER INTERFACE----------------------------------------------------------------------------------------------------------------------------------------------
 // Customer Main Page
 void customerPage() {
     char option;
@@ -472,10 +493,8 @@ int main() {
 
 //user.dat (put in the same directory as the cpp file)
 /*
-1,YKLiang,abc1234,1
-2,QiXian,xyz456,0
-3,WeiSheng,rsd1101,0
-4,ZhiQiang,123456,0
+yk,123
+qx,456
 */
 
 
