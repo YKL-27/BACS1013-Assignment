@@ -24,7 +24,6 @@ void customerLogin();
 void customerPage();
 void adminLogin();
 void adminPage();
-void serviceExpertPage();
 
 void makeBooking();
 string selectService();
@@ -38,6 +37,8 @@ string autoAssignExpert();
 // Global variables & constants (if any)
 #define FILE_USER "users.dat"
 #define FILE_SCHEDULE "schedule.dat"
+//using to display username on customerPage when login successful
+string CURRENTUSERNAME = "";
 
 struct userType {
     string username = "";
@@ -123,7 +124,7 @@ void aboutUsPage() {
 }
 
 
-// FILE READ------------------------------------------------------------------------------------------------------------------------------------------------------
+// FILE READ/WRITE------------------------------------------------------------------------------------------------------------------------------------------------------
 // Check if username met in registration
 bool registerUsernameAvailable(string username) {
     userType users[100];
@@ -161,6 +162,7 @@ bool registerUsernameAvailable(string username) {
     return true;
 }
 
+// Add user.username & user.password to savefile
 void addNewUserToFile(userType new_user) {
     // Create a record in CSV-like format
     string record = new_user.username + ',' + new_user.password;
@@ -178,6 +180,8 @@ void addNewUserToFile(userType new_user) {
     outFile.close();
 }
 
+
+// CUSTOMER LOGIN/REGISTRATION------------------------------------------------------------------------------------------------------------------------------------------------------
 // User (customer) Registration Page
 void registerPage() {
     newPageLogo();
@@ -204,9 +208,10 @@ void registerPage() {
 
             userType new_user = {inputUsername, inputPassword};
             addNewUserToFile(new_user);
+            CURRENTUSERNAME = inputUsername;
             cout << "\n\nRegistred successful\nPress enter to continue\t";
             loop = false;
-            pauseEnter();
+            pauseEnter();   
             customerPage();
         }
         else {
@@ -281,13 +286,15 @@ void customerLogin() {
         }
         if (recordFound) {
             cout << "\n\nAccess granted\nPress enter to continue\t";
+            CURRENTUSERNAME = inputUsername; //display username on customerPage()
             loop = false;
             pauseEnter();
             customerPage();
+            return;
         }
         else {
             char option;
-            cout << "\n\nAccess denied\nDo you wish to continue? (Y/N)\n\t";
+            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N)\n\t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -296,69 +303,29 @@ void customerLogin() {
     mainMenu();
 }
 
-
-// CUSTOMER INTERFACE----------------------------------------------------------------------------------------------------------------------------------------------
+// CUSTOMERS' INTERFACE----------------------------------------------------------------------------------------------------------------------------------------------
 // Customer Main Page
 void customerPage() {
     char option;
     newPageLogo();
     cout << "--------CUSTOMER HOMEPAGE--------\n";
-    cout << "Welcome User!\n";
+    cout << "Welcome " << CURRENTUSERNAME << endl;
     cout << "Please choose your option.\n";
 
-    cout << "A\t: View Service & Expert\n";
-    cout << "B\t: Make Booking\n";
-    cout << "C\t: My bookings\n";
-    cout << "D\t: View Schedule\n";
-    cout << "E\t: Feedback Form\n";
-    cout << "F\t: Return to Main Menu\n\n";
-
-    cout << "Enter your choice:\t";
-    cin >> option;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-    switch (option) {
-    case 'A': case 'a':
-        serviceExpertPage();
-        break;
-    case 'B': case 'b':
-        makeBooking();
-        break;
-    case 'C': case 'c':
-        cout << "You chose an option of My bookings\n";
-        break;
-    case 'D': case 'd':
-        cout << "You chose an option of View Schedule\n";
-        break;
-    case 'E': case 'e':
-        cout << "You chose an option of Feedback Form\n";
-        break;
-    case 'F': case 'f':
-        mainMenu();
-        break;
-    default:
-        cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
-        pauseEnter();
-        customerPage(); // Return to customer login for a retry
-    }
-}
-
-// Customer > view Service & Expert
-void serviceExpertPage() {
-    char option;
-    newPageLogo();
-    cout << "--------VIEW SERVICE & EXPERT--------\n";
-    cout << "Please choose your option.\n";
     cout << "A\t: View Service\n";
     cout << "B\t: View Expert\n";
-    cout << "C\t: Return to Customer Homepage\n";
+    cout << "C\t: Make Booking\n";
+    cout << "D\t: My bookings\n";
+    cout << "E\t: View Schedule\n";
+    cout << "F\t: Feedback Form\n";
+    cout << "G\t: Return to Main Menu\n\n";
+
     cout << "Enter your choice:\t";
     cin >> option;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     switch (option) {
     case 'A': case 'a':
-
         newPageLogo();
         cout << "--------OUR SERVICE--------\n";
         cout << "1. Hair Cut\n";
@@ -366,7 +333,7 @@ void serviceExpertPage() {
         cout << "3. Hair Dying\n\n";
         cout << "Press enter to return:\t";
         pauseEnter();
-        serviceExpertPage(); // Return to customer login for a retry
+        customerPage();
         break;
     case 'B': case 'b':
         newPageLogo();
@@ -376,15 +343,26 @@ void serviceExpertPage() {
         cout << "3. Catherine Tan\n\n";
         cout << "Press enter to return\t";
         pauseEnter();
-        serviceExpertPage(); // Return to customer login for a retry
-        break;
-    case 'C': case 'c':
         customerPage();
+    case 'C': case 'c':
+        makeBooking();
+        break;
+    case 'D': case 'd':
+        cout << "You chose an option of My bookings\n";
+        break;
+    case 'E': case 'e':
+        cout << "You chose an option of View Schedule\n";
+        break;
+    case 'F': case 'f':
+        cout << "You chose an option of Feedback Form\n";
+        break;
+    case 'G': case 'g':
+        mainMenu();
         break;
     default:
         cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
         pauseEnter();
-        serviceExpertPage();
+        customerPage(); // Return to customer login for a retry
     }
 }
 
@@ -481,8 +459,46 @@ void makeBooking() {
 }
 
 void adminLogin() {
+    bool loop = true;
+    do {
+        newPageLogo();
+        cout << "\nADMIN LOGIN";
+        string inputUsername = "", inputPassword = "";
+        cout << "\nEnter your username:\t";
+        getline(cin, inputUsername);
+        cout << "\nEnter your password:\t";
+        getline(cin, inputPassword);
+        /*
+        char ch;
+        ch = _getch();
+        while (ch != 13) {//character 13 is enter
+            inputPassword.push_back(ch);
+            cout << '*';
+            ch = _getch();
+        }
+        */
+        if (inputUsername == "havensadmin" && inputPassword == "haven1234") {
+            cout << "\n\nAccess granted\nPress enter to continue\t";
+            loop = false;
+            pauseEnter();
+            adminPage();
+            return;
+        }
+        else {
+            char option;
+            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N)\n\t";
+            cin >> option;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            loop = (toupper(option) == 'Y') ? true : false;
+        }
+    } while (loop);
+    mainMenu();
+}
+
+
+void adminPage() {
     newPageLogo();
-    cout << "ADMIN LOGIN";
+    cout << "Welcome Admin";
 }
 
 int main() {
@@ -493,8 +509,10 @@ int main() {
 
 //user.dat (put in the same directory as the cpp file)
 /*
-yk,123
-qx,456
+ykliang,yk123
+qixian,qx456
+weisheng,sws789
+zhiqiang,wzq0000
+
 */
-
-
+// The \n under last record is necessary!
