@@ -29,6 +29,7 @@ void adminPage();
 void makeBooking();
 string selectService();
 string selectExpert();
+string selectDate();
 string selectTimeSlot();
 string selectPaymentMode();
 int getChoice(const vector<string>& options);
@@ -405,6 +406,18 @@ int getChoice(const vector<string>& options) {
     return choice;
 }
 
+//Define the service duration 
+int getServiceDuration(const string& service) {
+    if (service == "Hair Cut" || service == "Hair Wash") {
+        return 1; // Duration in hours
+    }
+    else if (service == "Hair Dying") {
+        return 2; // Duration in hours
+    }
+    return 1;
+}
+
+
 // Customer > Make Booking > Select Service
 string selectService() {
     newPageLogo();
@@ -434,16 +447,40 @@ string autoAssignExpert() {
     return experts[index];
 }
 
-// Customer > Make Booking > Select Service > Select Expert > Select Time Slot
-string selectTimeSlot() {
+// Customer > Make Booking > Select Service > Select Date >Select Expert
+string selectDate() {
     newPageLogo();
-    vector<string> timeSlots = { "10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM" };
+    vector<string> date = { "Monday", "Tuesday", "Wednesday" , "Thursday" , "Friday" };
+    cout << "--------SELECT A RESERVATION DATE--------\n";
+    int choice = getChoice(date);
+    return date[choice - 1];
+}
+// Customer > Make Booking > Select Service > Select Expert > Select Date > Select Time Slot
+string selectTimeSlot(int serviceDuration) {
+    newPageLogo();
+    vector<string> timeSlots = { "Timeslot 1(AM)", "Timeslot 2(PM)", "Timeslot 3(EV)" };
+    cout << "Available time slots for a " << serviceDuration << "-hour service:\n";
     cout << "--------SELECT A TIME SLOT--------\n";
-    int choice = getChoice(timeSlots);
+    int availableSlots = timeSlots.size();
+    if (serviceDuration == 2) {
+        // Remove the last slot for services that take 2 hours
+        availableSlots--;
+    }
+
+    for (int i = 0; i < availableSlots; ++i) {
+        cout << i + 1 << ". " << timeSlots[i] << endl;
+    }
+
+    int choice;
+    cout << "Enter your choice: ";
+    while (!(cin >> choice) || choice < 1 || choice > availableSlots) {
+        cout << "Invalid choice. Please enter a number between 1 and " << availableSlots << ": ";
+    }
+
     return timeSlots[choice - 1];
 }
 
-// Customer > Make Booking > Select Service > Select Expert > Select Time Slot > Select Payment Mode
+// Customer > Make Booking > Select Service > Select Expert > Select Date > Select Time Slot > Select Payment Mode
 string selectPaymentMode() {
     newPageLogo();
     vector<string> paymentModes = { "Credit Card", "Debit Card", "Cash" };
@@ -454,10 +491,17 @@ string selectPaymentMode() {
 
 // Customer > Make Booking
 void makeBooking() {
-    string service, expert, timeSlot, paymentMode;
+    string service, expert, date, timeSlot, paymentMode;
+    int serviceDuration;
+
+    // Select Service and get the duration
     service = selectService();
+    serviceDuration = getServiceDuration(service);
+
+    // Continue with other selections
     expert = selectExpert();
-    timeSlot = selectTimeSlot();
+    date = selectDate();
+    timeSlot = selectTimeSlot(serviceDuration);
     paymentMode = selectPaymentMode();
 
     //Summary of the booking 
@@ -465,6 +509,7 @@ void makeBooking() {
     cout << "--------BOOKING CONFIRMATION--------\n";
     cout << "Service: " << service << endl;
     cout << "Expert: " << expert << endl;
+    cout << "Date: " << date << endl;
     cout << "Time Slot: " << timeSlot << endl;
     cout << "Payment Mode: " << paymentMode << endl;
     cout << "Confirm your booking (Y/N): ";
@@ -483,6 +528,7 @@ void makeBooking() {
     pauseEnter();
     customerPage();
 }
+
 
 void adminLogin() {
     bool loop = true;
