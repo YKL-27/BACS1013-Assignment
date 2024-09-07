@@ -20,8 +20,9 @@ void aboutUsPage();
 void registerPage();
 bool registerUsernameAvailable(string username);
 void customerLogin();
-
 void customerPage();
+void customerLogout();
+
 void adminLogin();
 void adminPage();
 
@@ -189,11 +190,13 @@ void registerPage() {
     bool loop = true;
     do {
         newPageLogo();
-        string inputUsername = "", inputPassword = "";
-        cout << "Enter a new username:\t";
+        string inputUsername = "", inputPassword = "", inputPassword2;
+        cout << "Enter a new username:\t\t";
         getline(cin, inputUsername);
-        cout << "\nEnter a new password:\t";
+        cout << "\nEnter a new password:\t\t";
         getline(cin, inputPassword);
+        cout << "\nEnter the new password again:\t";
+        getline(cin, inputPassword2);
         /*
         char ch;
         ch = _getch();
@@ -205,14 +208,24 @@ void registerPage() {
         */
 
         if (registerUsernameAvailable(inputUsername)) {
+            if (inputPassword == inputPassword2) {
+                userType new_user = { inputUsername, inputPassword };
+                addNewUserToFile(new_user);
+                CURRENTUSERNAME = inputUsername;
+                cout << "\n\nRegistred successful\nPress enter to continue\t";
+                loop = false;
+                pauseEnter();
+                customerPage();
+                return;
+            }
+            else {
+                char option;
+                cout << "\n\nBoth password do not match\nDo you wish to continue? (Y/N)\n\t";
+                cin >> option;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                loop = (toupper(option) == 'Y') ? true : false;
+            }
 
-            userType new_user = {inputUsername, inputPassword};
-            addNewUserToFile(new_user);
-            CURRENTUSERNAME = inputUsername;
-            cout << "\n\nRegistred successful\nPress enter to continue\t";
-            loop = false;
-            pauseEnter();   
-            customerPage();
         }
         else {
             char option;
@@ -238,7 +251,7 @@ void customerLogin() {
         pauseEnter();
         mainMenu();
     }
-
+    // Get list of all records
     string record;
     int counter = 0;
     while (getline(infile, record)) {
@@ -276,9 +289,8 @@ void customerLogin() {
         }
         */
 
-
+        // Check if username and password are in the record
         for (int i = 0; i < counter; i++) {
-            cout << endl << users[i].username << "       " << users[i].password;
             if (inputUsername == users[i].username && inputPassword == users[i].password) {
                 recordFound = true;
                 break;
@@ -318,7 +330,7 @@ void customerPage() {
     cout << "D\t: My bookings\n";
     cout << "E\t: View Schedule\n";
     cout << "F\t: Feedback Form\n";
-    cout << "G\t: Return to Main Menu\n\n";
+    cout << "G\t: Log Out and Return to Main Menu\n\n";
 
     cout << "Enter your choice:\t";
     cin >> option;
@@ -357,12 +369,26 @@ void customerPage() {
         cout << "You chose an option of Feedback Form\n";
         break;
     case 'G': case 'g':
-        mainMenu();
+        customerLogout();
         break;
     default:
         cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
         pauseEnter();
         customerPage(); // Return to customer login for a retry
+    }
+}
+
+// Ask confirm logout and go to main menu
+void customerLogout() {
+    char confirmLogout = 'Y';
+    cout << "\nDo you wish to log out? (Y/N)\n\t";
+    cin >> confirmLogout;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    if (toupper(confirmLogout) == 'Y') {
+        mainMenu();
+    }
+    else {
+        customerPage();
     }
 }
 
@@ -516,3 +542,6 @@ zhiqiang,wzq0000
 
 */
 // The \n under last record is necessary!
+
+//schedule.dat (put in the same directory as the cpp file)
+/**/
