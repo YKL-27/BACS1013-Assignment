@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="schedule.dat" />
-    <None Include="users.dat" />
+    <None Include="bookings.dat" />
+    <None Include="user.dat" />
   </ItemGroup>
 </Project>

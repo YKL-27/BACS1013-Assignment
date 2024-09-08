@@ -130,8 +130,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="schedule.dat" />
-    <None Include="users.dat" />
+    <None Include="bookings.dat" />
+    <None Include="user.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,11 +4,27 @@
 #include <fstream>
 #include <sstream>
 #include <cmath>
-//#include <conio.h>
 #include <cstdlib>
 #include <vector>
 #include <ctime>
+//#include <conio.h>
 using namespace std;
+
+// Structure definition
+struct userType {
+    string username = "";
+    string password = "";
+    bool admin = 0;
+};
+
+struct bookingType {
+    string day = "";
+    string timeslot = "";
+    string expert = "";
+    string service = "";
+    double cost = 0.0;
+    string payment_mode = "";
+};
 
 // Function prototypes
 void newPageLogo();
@@ -18,7 +34,7 @@ void mainMenu();
 void aboutUsPage();
 
 void registerPage();
-bool registerUsernameAvailable(string username);
+bool checkUsernameAvailable(string username);
 void customerLogin();
 void customerPage();
 void customerLogout();
@@ -34,19 +50,13 @@ string selectTimeSlot();
 string selectPaymentMode();
 int getChoice(const vector<string>& options);
 string autoAssignExpert();
-
+bool checkBookingAvailable(string day, string timeslot, string expert);
+void saveBookingToFile(bookingType newBooking);
 
 // Global variables & constants (if any)
-#define FILE_USER "users.dat"
-#define FILE_SCHEDULE "schedule.dat"
-//using to display username on customerPage when login successful
-string CURRENTUSERNAME = "";
-
-struct userType {
-    string username = "";
-    string password = "";
-    bool admin = 0;
-};
+#define FILE_USERS "user.dat"
+#define FILE_BOOKINGS "bookings.dat"
+string CURRENTUSERNAME = "";    //using to display username on customerPage when login successful
 
 // Create a new page by clearing the screen and displaying a logo on top
 void newPageLogo() {
@@ -126,12 +136,12 @@ void aboutUsPage() {
 }
 
 
-// FILE READ/WRITE------------------------------------------------------------------------------------------------------------------------------------------------------
+// USER FILE READ/WRITE------------------------------------------------------------------------------------------------------------------------------------------------------
 // Check if username met in registration
-bool registerUsernameAvailable(string username) {
+bool checkUsernameAvailable(string username) {
     userType users[100];
 
-    ifstream infile(FILE_USER);
+    ifstream infile(FILE_USERS);
     if (!infile) {
         cout << "\n\nUnable to login currently due to system error\nPress enter to return to main menu\t";
         pauseEnter();
@@ -170,7 +180,7 @@ void addNewUserToFile(userType new_user) {
     string record = new_user.username + ',' + new_user.password;
     cout << record << endl;  // Display the record for debugging
 
-    ofstream outFile(FILE_USER, ios::app); // Open file in append mode
+    ofstream outFile(FILE_USERS, ios::app); // Open file in append mode
 
     if (!outFile) {
         cout << "Sorry, an error occurred while opening the file.";
@@ -208,7 +218,7 @@ void registerPage() {
         }
         */
 
-        if (registerUsernameAvailable(inputUsername)) {
+        if (checkUsernameAvailable(inputUsername)) {
             if (inputPassword == inputPassword2) {
                 userType new_user = { inputUsername, inputPassword };
                 addNewUserToFile(new_user);
@@ -246,7 +256,7 @@ void customerLogin() {
     // Read file
     userType users[100];
 
-    ifstream infile(FILE_USER);
+    ifstream infile(FILE_USERS);
     if (!infile) {
         cout << "\n\nUnable to login currently due to system error\nPress enter to return to main menu\t";
         pauseEnter();
@@ -417,7 +427,6 @@ int getServiceDuration(const string& service) {
     return 1;
 }
 
-
 // Customer > Make Booking > Select Service
 string selectService() {
     newPageLogo();
@@ -458,7 +467,7 @@ string selectDate() {
 // Customer > Make Booking > Select Service > Select Expert > Select Date > Select Time Slot
 string selectTimeSlot(int serviceDuration) {
     newPageLogo();
-    vector<string> timeSlots = { "Timeslot 1(AM)", "Timeslot 2(PM)", "Timeslot 3(EV)" };
+    vector<string> timeSlots = { "Timeslot 1(10:00AM - 12:00PM)", "Timeslot 2(2:00PM - 4:00PM)", "Timeslot 3(4:00PM - 6:00PM)" };
     cout << "Available time slots for a " << serviceDuration << "-hour service:\n";
     cout << "--------SELECT A TIME SLOT--------\n";
     int availableSlots = timeSlots.size();
@@ -494,42 +503,95 @@ void makeBooking() {
     string service, expert, date, timeSlot, paymentMode;
     int serviceDuration;
 
-    // Select Service and get the duration
     service = selectService();
     serviceDuration = getServiceDuration(service);
-
-    // Continue with other selections
     expert = selectExpert();
     date = selectDate();
     timeSlot = selectTimeSlot(serviceDuration);
     paymentMode = selectPaymentMode();
 
-    //Summary of the booking 
-    newPageLogo();
-    cout << "--------BOOKING CONFIRMATION--------\n";
-    cout << "Service: " << service << endl;
-    cout << "Expert: " << expert << endl;
-    cout << "Date: " << date << endl;
-    cout << "Time Slot: " << timeSlot << endl;
-    cout << "Payment Mode: " << paymentMode << endl;
-    cout << "Confirm your booking (Y/N): ";
-    char confirm;
-    cin >> confirm;
+    bool available = checkBookingAvailable(date, timeSlot, expert);
 
-    //Confirm the booking 
-    if (confirm == 'Y' || confirm == 'y') {
-        cout << "Your booking has been confirmed!" << endl;
-        cout << "Press Enter For going back to customer page...";
+    if (available) {
+        char confirm;
+        cout << "Confirm your booking (Y/N): ";
+        cin >> confirm;
+
+        if (confirm == 'Y' || confirm == 'y') {
+            bookingType newBooking = { date, timeSlot, expert, service, 100.0, paymentMode };
+            saveBookingToFile(newBooking);
+            cout << "Your booking has been confirmed!\n";
+        }
+        else {
+            cout << "Booking canceled.\n";
+        }
     }
     else {
-        cout << "Booking canceled." << endl;
-        cout << "Press Enter For going back to customer page...";
+        cout << "Sorry, the selected slot is not available.\n";
     }
+
     pauseEnter();
     customerPage();
 }
 
+// BOOKINGS FILE READ/WRITE------------------------------------------------------------------------------------------------------------------------------------------------------
+// Check if booking is available based on day, timeslot, and expert
+bool checkBookingAvailable(string day, string timeslot, string expert) {
+    bookingType bookings[100];
 
+    ifstream infile(FILE_BOOKINGS);
+    if (!infile) {
+        cout << "\n\nUnable to make booking currently due to system error\nPress enter to return to main menu\t";
+        return false;
+    }
+
+    string record;
+    int counter = 0;
+    while (getline(infile, record)) {
+        stringstream ss(record);
+        bookingType booking;
+
+        getline(ss, booking.day, ',');
+        getline(ss, booking.timeslot, ',');
+        getline(ss, booking.expert, ',');
+        getline(ss, booking.service, ',');
+        ss >> booking.cost;
+        ss.ignore(1);  // Ignore the comma
+        getline(ss, booking.payment_mode);
+
+        bookings[counter] = booking;
+        counter++;
+    }
+    infile.close();
+
+    // Check if the booking is available
+    for (int i = 0; i < counter; i++) {
+        if (bookings[i].day == day && bookings[i].timeslot == timeslot && bookings[i].expert == expert) {
+            return false; // Booking is already taken
+        }
+    }
+
+    return true; // Booking is available
+}
+
+
+// Save the booking information to file
+void saveBookingToFile(bookingType newBooking) {
+    ofstream outFile(FILE_BOOKINGS, ios::app);
+
+    if (!outFile) {
+        cout << "Sorry, an error occurred while saving the booking.";
+        return;
+    }
+
+    outFile << newBooking.day << "," << newBooking.timeslot << "," << newBooking.expert << ","
+        << newBooking.service << "," << fixed << setprecision(2) << newBooking.cost << ","
+        << newBooking.payment_mode << "\n";
+    outFile.close();
+}
+
+// ADMIN----------------------------------------------------------------------------------------------------------------------------------------------
+// Admin Login Page
 void adminLogin() {
     bool loop = true;
     do {
@@ -567,12 +629,14 @@ void adminLogin() {
     mainMenu();
 }
 
-
+// Admin Interface
 void adminPage() {
     newPageLogo();
     cout << "Welcome Admin";
 }
 
+
+// MAIN PROGRAM STARTS HERE----------------------------------------------------------------------------------------------------------------------------------------------
 int main() {
     mainMenu(); // Start the menu
     return 0;
@@ -587,7 +651,12 @@ weisheng,sws789
 zhiqiang,wzq0000
 
 */
-// The \n under last record is necessary!
 
-//schedule.dat (put in the same directory as the cpp file)
-/**/
+//bookings.dat (put in the same directory as the cpp file)
+/*
+1,1,1,1,25.00,1
+1,2,2,3,80.00,2
+
+*/
+
+// *The \n under last record is necessary!
