@@ -18,12 +18,12 @@ struct userType {
 };
 
 struct bookingType {
-    string day = "";
-    string timeslot = "";
-    string expert = "";
-    string service = "";
+    int day = 0;
+    int timeslot = 0;
+    int expert = 0;
+    int service = 0;
     double cost = 0.0;
-    string payment_mode = "";
+    int payment_mode = 0;
 };
 
 // Function prototypes
@@ -43,14 +43,14 @@ void adminLogin();
 void adminPage();
 
 void makeBooking();
-string selectService();
-string selectExpert();
-string selectDate();
-string selectTimeSlot();
-string selectPaymentMode();
+int selectService();
+int selectExpert();
+int selectDate();
+int selectTimeSlot();
+int selectPaymentMode();
 int getChoice(const vector<string>& options);
-string autoAssignExpert();
-bool checkBookingAvailable(string day, string timeslot, string expert);
+int autoAssignExpert();
+bool checkBookingAvailable(int day, int timeslot, int expert);
 void saveBookingToFile(bookingType newBooking);
 
 // Global variables & constants (if any)
@@ -58,7 +58,7 @@ void saveBookingToFile(bookingType newBooking);
 #define FILE_BOOKINGS "bookings.dat"
 string CURRENTUSERNAME = "";    //using to display username on customerPage when login successful
 string DAY[5] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
-string TIMESLOT[3] = { "Timeslot 1(10:00AM - 12:00PM)", "Timeslot 2(2:00PM - 4:00PM)", "Timeslot 3(4:00PM - 6:00PM)" };
+string TIMESLOT[3] = { "Timeslot 1 (10:00AM - 12:00PM)", "Timeslot 2 (2:00PM - 4:00PM)", "Timeslot 3 (4:00PM - 6:00PM)" };
 string EXPERT[3] = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
 string SERVICE[4] = { "Hair Cut", "Hair Wash", "Hair Dying", "Styling Consultation"};
 double COST[4] = {25.00, 15.00, 80.00, 15.00};
@@ -422,28 +422,28 @@ int getChoice(const vector<string>& options) {
     return choice;
 }
 
-//Define the service duration 
-int getServiceDuration(const string& service) {
-    if (service == "Hair Cut" || service == "Hair Wash") {
-        return 1; // Duration in hours
-    }
-    else if (service == "Hair Dying") {
+//Define the service duration
+/*int getServiceDuration(const int& service) {
+    if (service == 1 || service == 2 || service == 3) {
         return 2; // Duration in hours
     }
+    else if (service == 4) {
+        return 1; // Duration in hours
+    }
     return 1;
-}
+}*/
 
 // Customer > Make Booking > Select Service
-string selectService() {
+int selectService() {
     newPageLogo();
     vector<string> services = { "Hair Cut", "Hair Wash", "Hair Dying" };
     cout << "--------SELECT A SERVICE--------\n";
     int choice = getChoice(services);
-    return services[choice - 1];
+    return choice - 1;
 }
 
 // Customer > Make Booking > Select Service > Select Expert
-string selectExpert() {
+int selectExpert() {
     newPageLogo();
     vector<string> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan", "Auto-assign" };
     cout << "--------SELECT AN EXPERT--------\n";
@@ -451,36 +451,40 @@ string selectExpert() {
     if (choice == 4) {
         return autoAssignExpert();
     }
-    return experts[choice - 1];
+    return choice - 1;
 }
 
 // Customer > Make Booking > Select Service > Select Expert (random assign expert function)
-string autoAssignExpert() {
+int autoAssignExpert() {
     vector<string> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
     srand(time(0));
     int index = rand() % experts.size();
-    return experts[index];
+    return index;
 }
 
 // Customer > Make Booking > Select Service > Select Date >Select Expert
-string selectDate() {
+int selectDate() {
     newPageLogo();
     vector<string> date = { "Monday", "Tuesday", "Wednesday" , "Thursday" , "Friday" };
     cout << "--------SELECT A RESERVATION DATE--------\n";
     int choice = getChoice(date);
-    return date[choice - 1];
+    return choice - 1;
 }
+
 // Customer > Make Booking > Select Service > Select Expert > Select Date > Select Time Slot
-string selectTimeSlot(int serviceDuration) {
+//int selectTimeSlot(int serviceDuration) {
+int selectTimeSlot() {
     newPageLogo();
-    vector<string> timeSlots = { "Timeslot 1(10:00AM - 12:00PM)", "Timeslot 2(2:00PM - 4:00PM)", "Timeslot 3(4:00PM - 6:00PM)" };
-    cout << "Available time slots for a " << serviceDuration << "-hour service:\n";
+    vector<string> timeSlots = { "Timeslot 1 (10:00AM - 12:00PM)", "Timeslot 2 (2:00PM - 4:00PM)", "Timeslot 3 (4:00PM - 6:00PM)" };
+    //cout << "Available time slots for a " << serviceDuration << "-hour service:\n";
     cout << "--------SELECT A TIME SLOT--------\n";
     int availableSlots = timeSlots.size();
+    /*
     if (serviceDuration == 2) {
         // Remove the last slot for services that take 2 hours
         availableSlots--;
     }
+    */
 
     for (int i = 0; i < availableSlots; ++i) {
         cout << i + 1 << ". " << timeSlots[i] << endl;
@@ -492,39 +496,49 @@ string selectTimeSlot(int serviceDuration) {
         cout << "Invalid choice. Please enter a number between 1 and " << availableSlots << ": ";
     }
 
-    return timeSlots[choice - 1];
+    return choice - 1;
 }
 
 // Customer > Make Booking > Select Service > Select Expert > Select Date > Select Time Slot > Select Payment Mode
-string selectPaymentMode() {
+int selectPaymentMode() {
     newPageLogo();
     vector<string> paymentModes = { "Credit Card", "Debit Card", "Cash" };
     cout << "--------SELECT A PAYMENT MODE--------\n";
     int choice = getChoice(paymentModes);
-    return paymentModes[choice - 1];
+    return choice - 1;
 }
 
 // Customer > Make Booking
 void makeBooking() {
-    string service, expert, date, timeSlot, paymentMode;
-    int serviceDuration;
+    int service, expert, date, timeSlot, paymentMode;
+    //int serviceDuration;
 
     service = selectService();
-    serviceDuration = getServiceDuration(service);
+    //serviceDuration = getServiceDuration(service);
     expert = selectExpert();
     date = selectDate();
-    timeSlot = selectTimeSlot(serviceDuration);
+    timeSlot = selectTimeSlot();
+    //timeSlot = selectTimeSlot(serviceDuration);
     paymentMode = selectPaymentMode();
 
     bool available = checkBookingAvailable(date, timeSlot, expert);
 
     if (available) {
         char confirm;
-        cout << "Confirm your booking (Y/N): ";
+        newPageLogo();
+        cout << "Booking Summary:\n";
+        cout << "\nDay:\t\t" << DAY[date];
+        cout << "\nTime Slot\t" << TIMESLOT[timeSlot];
+        cout << "\nService:\t" << SERVICE[service];
+        cout << "\nExpert:\t\t" << EXPERT[expert];
+        cout << "\nCost:\t\t" << COST[service];
+        cout << "\nPayment Method:\t" << PAYMENTMODE[paymentMode];
+        cout << "\n\nConfirm your booking (Y/N): ";
         cin >> confirm;
 
         if (confirm == 'Y' || confirm == 'y') {
-            bookingType newBooking = { date, timeSlot, expert, service, 100.0, paymentMode };
+            //createBooking(date, timeSlot, expert, service, paymentMode);
+            bookingType newBooking = { date, timeSlot, expert, service, COST[service], paymentMode};
             saveBookingToFile(newBooking);
             cout << "Your booking has been confirmed!\n";
         }
@@ -535,14 +549,15 @@ void makeBooking() {
     else {
         cout << "Sorry, the selected slot is not available.\n";
     }
-
     pauseEnter();
     customerPage();
 }
 
+//bookingType createBooking(int date, int timeslot, int expert, int service, int paymentMode) {}
+
 // BOOKINGS FILE READ/WRITE------------------------------------------------------------------------------------------------------------------------------------------------------
 // Check if booking is available based on day, timeslot, and expert
-bool checkBookingAvailable(string day, string timeslot, string expert) {
+bool checkBookingAvailable(int day, int timeslot, int expert) {
     bookingType bookings[100];
 
     ifstream infile(FILE_BOOKINGS);
@@ -553,17 +568,27 @@ bool checkBookingAvailable(string day, string timeslot, string expert) {
 
     string record;
     int counter = 0;
+
     while (getline(infile, record)) {
         stringstream ss(record);
         bookingType booking;
 
-        getline(ss, booking.day, ',');
-        getline(ss, booking.timeslot, ',');
-        getline(ss, booking.expert, ',');
-        getline(ss, booking.service, ',');
+        // Extract integers for day, timeslot, expert, and service
+        ss >> booking.day;
+        ss.ignore(1);  // Skip the comma
+        ss >> booking.timeslot;
+        ss.ignore(1);  // Skip the comma
+        ss >> booking.expert;
+        ss.ignore(1);  // Skip the comma
+        ss >> booking.service;
+        ss.ignore(1);  // Skip the comma
+
+        // Extract the cost as a float
         ss >> booking.cost;
-        ss.ignore(1);  // Ignore the comma
-        getline(ss, booking.payment_mode);
+        ss.ignore(1);  // Skip the comma
+
+        // Extract payment_mode as an integer
+        ss >> booking.payment_mode;
 
         bookings[counter] = booking;
         counter++;
@@ -581,6 +606,7 @@ bool checkBookingAvailable(string day, string timeslot, string expert) {
 }
 
 
+
 // Save the booking information to file
 void saveBookingToFile(bookingType newBooking) {
     ofstream outFile(FILE_BOOKINGS, ios::app);
@@ -590,8 +616,12 @@ void saveBookingToFile(bookingType newBooking) {
         return;
     }
 
-    outFile << newBooking.day << "," << newBooking.timeslot << "," << newBooking.expert << ","
-        << newBooking.service << "," << fixed << setprecision(2) << newBooking.cost << ","
+    outFile << newBooking.day << "," 
+        << newBooking.timeslot << "," 
+        << newBooking.expert << ","
+        << newBooking.service << "," 
+        << fixed << setprecision(2) 
+        << newBooking.cost << ","
         << newBooking.payment_mode << "\n";
     outFile.close();
 }
@@ -652,9 +682,9 @@ int main() {
 //user.dat (put in the same directory as the cpp file)
 /*
 ykliang,yk123
-qixian,qx456
-weisheng,sws789
-zhiqiang,wzq0000
+qxwong,qx456
+wssoh,ws789
+zqwang,zq000
 
 */
 
