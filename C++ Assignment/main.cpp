@@ -41,6 +41,7 @@ void customerLogout();
 
 void adminLogin();
 void adminPage();
+void adminLogout();
 
 void makeBooking();
 int selectService();
@@ -237,7 +238,7 @@ void registerPage() {
             }
             else {
                 char option;
-                cout << "\n\nBoth password do not match\nDo you wish to continue? (Y/N)\n\t";
+                cout << "\n\nBoth password do not match\nDo you wish to continue? (Y/N):\t";
                 cin >> option;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 loop = (toupper(option) == 'Y') ? true : false;
@@ -246,7 +247,7 @@ void registerPage() {
         }
         else {
             char option;
-            cout << "\n\nUsername taken\nDo you wish to continue? (Y/N)\n\t";
+            cout << "\n\nUsername taken\nDo you wish to continue? (Y/N):\t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -323,7 +324,7 @@ void customerLogin() {
         }
         else {
             char option;
-            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N)\n\t";
+            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N):\t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -398,7 +399,7 @@ void customerPage() {
 // Ask confirm logout and go to main menu
 void customerLogout() {
     char confirmLogout = 'Y';
-    cout << "\nDo you wish to log out? (Y/N)\n\t";
+    cout << "\nDo you wish to log out? (Y/N):\t";
     cin >> confirmLogout;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     if (toupper(confirmLogout) == 'Y') {
@@ -649,6 +650,7 @@ void adminLogin() {
         */
         if (inputUsername == "havensadmin" && inputPassword == "haven1234") {
             cout << "\n\nAccess granted\nPress enter to continue\t";
+            CURRENTUSERNAME = inputUsername;
             loop = false;
             pauseEnter();
             adminPage();
@@ -656,7 +658,7 @@ void adminLogin() {
         }
         else {
             char option;
-            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N)\n\t";
+            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N):\t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -666,10 +668,59 @@ void adminLogin() {
 }
 
 // Admin Interface
+// Admin Interface
 void adminPage() {
+    char option;
     newPageLogo();
-    cout << "Welcome Admin";
+    cout << "--------ADMIN HOMEPAGE--------\n";
+    cout << "Welcome " << CURRENTUSERNAME << endl;
+    cout << "Please choose your option.\n";
+
+    cout << "A\t: View Customer\n";
+    cout << "B\t: View Sales Record\n";
+    cout << "C\t: View Schedule\n";
+    cout << "D\t: Log Out and Return to Main Menu\n\n";
+
+    cout << "Enter your choice:\t";
+    cin >> option;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    switch (option) {
+    case 'A': case 'a':
+        newPageLogo();
+        cout << "You choose view customer!";
+        break;
+    case 'B': case 'b':
+        newPageLogo();
+        cout << "You choose view sales record";
+    case 'C': case 'c':
+        newPageLogo();
+        cout << "you choose view schedule";
+        break;
+    case 'D': case 'd':
+        adminLogout();
+        break;
+    default:
+        cout << "\nInvalid option, Please try again!\nPress enter to continue\t";
+        pauseEnter();
+        adminPage(); // Return to admin page for a retry
+    }
 }
+
+// Ask confirm logout and go to main menu
+void adminLogout() {
+    char confirmLogout = 'Y';
+    cout << "\nDo you wish to log out? (Y/N):\t";
+    cin >> confirmLogout;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    if (toupper(confirmLogout) == 'Y') {
+        mainMenu();
+    }
+    else {
+        adminPage();
+    }
+}
+
 
 
 // MAIN PROGRAM STARTS HERE----------------------------------------------------------------------------------------------------------------------------------------------
