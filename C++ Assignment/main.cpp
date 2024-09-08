@@ -57,6 +57,12 @@ void saveBookingToFile(bookingType newBooking);
 #define FILE_USERS "user.dat"
 #define FILE_BOOKINGS "bookings.dat"
 string CURRENTUSERNAME = "";    //using to display username on customerPage when login successful
+string DAY[5] = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+string TIMESLOT[3] = { "Timeslot 1(10:00AM - 12:00PM)", "Timeslot 2(2:00PM - 4:00PM)", "Timeslot 3(4:00PM - 6:00PM)" };
+string EXPERT[3] = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
+string SERVICE[4] = { "Hair Cut", "Hair Wash", "Hair Dying", "Styling Consultation"};
+double COST[4] = {25.00, 15.00, 80.00, 15.00};
+string PAYMENTMODE[3] = { "Credit Card", "Debit Card", "Cash" };
 
 // Create a new page by clearing the screen and displaying a logo on top
 void newPageLogo() {
