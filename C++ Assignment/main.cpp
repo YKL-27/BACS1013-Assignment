@@ -67,7 +67,7 @@ const string SERVICE[4] = { "Hair Cut", "Hair Wash", "Hair Dying", "Styling Cons
 const string PAYMENTMODE[3] = { "Credit Card", "Debit Card", "Cash" };
 const double COST[4] = {25.00, 15.00, 80.00, 15.00};
 
-string CURRENT_USERNAME = "";    //using to display username on customerPage when login successful
+string CURRENT_USERNAME = "";    // For displaying username on customerPage/adminPage after login successful
 
 //------------------------------------------------------COMMON FUNCTIONS
 // Create a new page by clearing the screen and displaying a logo on top
@@ -139,8 +139,10 @@ void aboutUsPage() {
     cout << "Welcome to Haven Saloon, where we provide a comfortable environment to experience and enjoy high-quality haircut services.\n";
     cout << "Our high-quality services are designed to ensure your satisfaction.\n\n";
     cout << "At Haven Saloon, our team of professional hairstylists has many years of experience and is committed to using the latest sustainable techniques and trends.\n";
-    cout << "We are friendly and will listen to your needs to provide personalised advice, offering a range of stylish looks to meet your requirements.\n";
-    cout << "Whether it's styling, colouring, or shampooing, we use high-quality products to ensure the best results.\n\n";
+    cout << "We are friendly and will listen to your needs to provide personalised advice, offering a range of stylish looks to meet your requirements. Whether it's\n";
+    cout << "styling, colouring, or shampooing, we use high-quality products to ensure the best results.\n\n";
+    cout << "In addition to our hairstyling services, we now offer expert consultations with our dedicated styling consultant. Whether you need guidance on a complete\n";
+    cout << "style transformation or advice on maintaining your current look, our consultant is here to tailor recommendations specifically for you.\n\n";
     cout << "Experience the warm and friendly atmosphere at Haven Saloon and let us provide you with caring service. We strive to make every visit a relaxing and enjoyable experience.\n\n";
     cout << "Enter any key to return to the main menu:\t";
     pauseEnter();
@@ -453,6 +455,7 @@ void customerPage() {
         cout << "1. Hair Cut\n";
         cout << "2. Hair Wash\n";
         cout << "3. Hair Dying\n\n";
+        cout << "4. Styling Consultation\n\n";
         cout << "Press enter to return:\t";
         pauseEnter();
         customerPage();
@@ -518,7 +521,7 @@ int getChoice(const vector<string>& options) {
 // Customer > Make Booking > Select Service
 int selectService() {
     newPageLogo();
-    vector<string> services = { "Hair Cut", "Hair Wash", "Hair Dying" };
+    vector<string> services = { "Hair Cut", "Hair Wash", "Hair Dying", "Styling Consultation" };
     cout << "--------SELECT A SERVICE--------\n";
     int choice = getChoice(services);
     return choice - 1;
