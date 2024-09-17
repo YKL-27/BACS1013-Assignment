@@ -52,11 +52,11 @@ void saveBookingToFile(bookingType newBooking);
 
 void makeBooking(string username, string currentPassword);
 int selectService();
-int selectExpert();
+int selectExpert(int day, int timeslot, bool isConsultation);
 int selectDate();
 int selectTimeSlot();
 int selectPaymentMode();
-int autoAssignExpert();
+int autoAssignExpert(int day, int timeslot, bool isConsultation);
 void generateReceipt(const bookingType& booking);
 
 void adminLogin();
@@ -913,24 +913,59 @@ int selectService() {
 }
 
 // Customer > Make Booking > Select Service > Select Expert
-int selectExpert() {
+int selectExpert(int day, int timeslot, bool isConsultation) {
     newPageLogo();
     array<string, 4> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan", "Auto-assign" };
+
     cout << "--------SELECT AN EXPERT--------\n";
     int choice = getChoice(experts);
+
+    // If user selects auto-assign option
     if (choice == 4) {
-        return autoAssignExpert();
+        int assignedExpert = autoAssignExpert(day, timeslot, isConsultation);  // Use the modified autoAssignExpert to check availability
+        if (assignedExpert != -1) {
+            cout << "Expert " << experts[assignedExpert] << " has been auto-assigned.\n";
+            return assignedExpert;
+        }
+        else {
+            return -1;  // Return -1 if no expert is available
+        }
     }
+
+    // Return selected expert index (adjust for array offset)
     return choice - 1;
 }
 
+
 // Customer > Make Booking > Select Service > Select Expert (random assign expert function)
-int autoAssignExpert() {
+int autoAssignExpert(int day, int timeslot, bool isConsultation) {
     array<string, 3> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
     srand(time(0));
-    int index = rand() % experts.size();
-    return index;
+
+    int availableExperts[3];  // Array to store indices of available experts
+    int countAvailable = 0;   // Counter for the number of available experts
+
+    // Check availability of each expert
+    for (int i = 0; i < experts.size(); i++) {
+        if (checkBookingAvailable(day, timeslot, i, isConsultation)) {
+            availableExperts[countAvailable] = i;  // Add available expert's index
+            countAvailable++;  // Increment the counter
+        }
+    }
+
+    if (countAvailable > 0) {
+        // Randomly select one of the available experts
+        int randomIndex = rand() % countAvailable;
+        return availableExperts[randomIndex];
+    }
+    else {
+        // No available experts
+        cout << "No available expert for the selected time slot." << endl;
+        cout << "Press Enter to return:";
+        return -1;  // Indicate no expert is available
+    }
 }
+
 
 // Customer > Make Booking > Select Service > Select Date >Select Expert
 int selectDate() {
@@ -992,7 +1027,6 @@ int selectPaymentMode() {
 void makeBooking(string username, string currentPassword) {
     string customerName;
     int service, expert, date, timeSlot, paymentMode;
-    //int serviceDuration;
 
     // Input customer name
     newPageLogo();
@@ -1000,13 +1034,21 @@ void makeBooking(string username, string currentPassword) {
     cout << "Enter your name for the booking: ";
     getline(cin, customerName);  // Get customer name
 
-    service = selectService();
-    expert = selectExpert();
-    date = selectDate();
-    timeSlot = selectTimeSlot(service); // Get the correct time slot based on the service
-    paymentMode = selectPaymentMode();
+    service = selectService();      // Choose a service
+    date = selectDate();            // Choose a date
+    timeSlot = selectTimeSlot(service); // Choose a time slot
 
-    bool isConsultation = (service == 3); //if customer select consultation
+    bool isConsultation = (service == 3); // Check if it's a consultation
+
+    expert = selectExpert(date, timeSlot, isConsultation); // Select expert
+    if (expert == -1) {
+        // If no available expert, return to customer page
+        pauseEnter();
+        customerPage(username, currentPassword);
+        return;
+    }
+
+    paymentMode = selectPaymentMode(); // Choose payment method
 
     bool available = checkBookingAvailable(date, timeSlot, expert, isConsultation);
 
@@ -1015,13 +1057,11 @@ void makeBooking(string username, string currentPassword) {
         cout << "Booking Summary:\n";
         cout << "\nCustomer Name:\t" << customerName;
         cout << "\nDay:\t\t" << DAY[date];
-
-        // Handle time slot display based on service type
         if (isConsultation) {
-            cout << "\nTime Slot\t" << TIMESLOT_CONSULT[timeSlot]; // ????
+            cout << "\nTime Slot\t" << TIMESLOT_CONSULT[timeSlot];
         }
         else {
-            cout << "\nTime Slot\t" << TIMESLOT[timeSlot]; // ????
+            cout << "\nTime Slot\t" << TIMESLOT[timeSlot];
         }
 
         cout << "\nService:\t" << SERVICE[service];
@@ -1032,7 +1072,6 @@ void makeBooking(string username, string currentPassword) {
         cin >> confirm;
 
         if (confirm == 'Y' || confirm == 'y') {
-            //createBooking(date, timeSlot, expert, service, paymentMode);
             bookingType newBooking = { customerName, date, timeSlot, expert, service, COST[service], paymentMode };
             saveBookingToFile(newBooking);
             generateReceipt(newBooking); // Generate the receipt
@@ -1048,6 +1087,7 @@ void makeBooking(string username, string currentPassword) {
     pauseEnter();
     customerPage(username, currentPassword);
 }
+
 // Function to generate a printable receipt
 void generateReceipt(const bookingType& booking) {
     // Open a file to save the receipt
@@ -1390,3 +1430,6 @@ Ben,1,2,2,3,80.00,2
 /*
 
 */ //The \n under last record is necessary!
+
+
+
