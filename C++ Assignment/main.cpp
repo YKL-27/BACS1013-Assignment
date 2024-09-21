@@ -29,7 +29,7 @@ struct userType {
 
 struct bookingType {
     string customerName;
-    int day = 0; // Represents the day of the month (1-31)
+    int day = 0; // Represents the day of the month (1-30)
     int timeslot = 0;
     int expert = 0;
     int service = 0;
@@ -737,7 +737,7 @@ void cancelBooking(string username, string currentPassword, bookingType* booking
     for (int i = 0; i < bookingCount; i++) {
         int idx = bookingIndices[i];
         cout << setw(4) << left << i + 1
-            << setw(25) << left << getFullDate(bookingsArray[idx].day) 
+            << setw(25) << left << getFullDate(bookingsArray[idx].day)
             << setw(25) << left
             << (bookingsArray[idx].service == 3 ? TIMESLOT_CONSULT[bookingsArray[idx].timeslot] : TREATMENT_TIMESLOT[bookingsArray[idx].timeslot])
             << setw(20) << left << EXPERT[bookingsArray[idx].expert]
@@ -1584,3 +1584,8 @@ Consultation 15.00
 /*
 
 */ //The \n under last record is necessary!
+
+
+
+
+
