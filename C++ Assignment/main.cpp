@@ -28,7 +28,6 @@ struct userType {
 
 struct bookingType {
     string customerName;
-    int week = 1;
     int day = 0; // Represents the day of the month (1-31)
     int timeslot = 0;
     int expert = 0;
@@ -44,7 +43,7 @@ void pauseEnter();
 void mainMenu();
 void aboutUsPage();
 
-void registerPage();
+void customerRegistration();
 bool checkUsernameAvailable(string username);
 
 void customerLogin();
@@ -63,7 +62,7 @@ void saveBookingToFile(bookingType newBooking);
 void makeBooking(string username, string currentPassword);
 int selectService();
 int selectExpert(int day, int timeslot, int service);
-int selectWeek();
+int selectDate();
 int selectTimeSlot(int service);
 int selectPaymentMode();
 int autoAssignExpert(int day, int timeslot, int hour);
@@ -80,19 +79,24 @@ void viewFeedbackForm(string username);
 // GLOBAL CONSTANT & VARIABLES------------------------------------------------------------------------------------------------------------------------------------------------------
 const string FILE_USERS = "users.dat";
 const string FILE_BOOKINGS = "bookings.dat";
-const int MAX_DAYS = 30; // Supports up to 30 days
+
 const string TREATMENT_TIMESLOT[3] = { "10:00AM - 12:00PM", "2:00PM - 4:00PM","4:00PM - 6:00PM" };
 const string TIMESLOT_CONSULT[6] = { "10:00AM - 11:00AM", "11:00AM - 12:00PM", "2:00PM - 3:00PM", "3:00PM - 4:00PM" , "4:00PM - 5:00PM", "5:00PM - 6:00PM" };
+const string HOURS[9] = { "10:00AM", "11:00AM", "12:00PM", " 1:00PM", " 2:00PM", " 3:00PM", " 4:00PM", " 5:00PM", " 6:00PM", };
+
 const string EXPERT[3] = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
 const string SERVICE[4] = { "Hair Cut", "Hair Wash", "Hair Dying", "Styling Consultation" };
 const int DURATION[4] = { 2,2,2,1 };
 const string PAYMENTMODE[3] = { "Credit Card", "Debit Card", "Cash" };
 const double COST[4] = { 25.00, 15.00, 80.00, 15.00 };
 
+const string MONTH = "10/2024";
+const int MAX_DAYS = 31; // Supports up to 31 days
+const int MONDAY = 0;  // 29 Sep is Monday, 1 day before 1 Oct, hence 1-1=0
+
 // Helper Functions
 int getDayOfWeek(int day) {
-    // Assuming day 1 is Monday
-    return ((day - 1) % 7) + 1;
+    return ((day - MONDAY) % 7) + 1;
 }
 
 // Checks if a given day is a weekend (Saturday or Sunday)
@@ -103,6 +107,7 @@ bool isWeekend(int day) {
 
 // Function to get the day name from day number
 string getDayName(int day) {
+    // Assuming day 1 is Monday
     int dayOfWeek = getDayOfWeek(day);
     switch (dayOfWeek) {
     case 1: return "Monday";
@@ -159,8 +164,8 @@ void mainMenu() {
     cout << "Please choose your option.\n\n";
     // Main Menu options
     cout << "A\t: About Us\n";
-    cout << "B\t: Customer Login\n";
-    cout << "C\t: Register\n";
+    cout << "B\t: Customer Register\n";
+    cout << "C\t: Cutomer Login\n";
     cout << "D\t: Admin Login\n";
     cout << "E\t: Exit\n\n";
 
@@ -173,10 +178,10 @@ void mainMenu() {
         aboutUsPage();
         break;
     case 'B': case 'b':
-        customerLogin();
+        customerRegistration();
         break;
     case 'C': case 'c':
-        registerPage();
+        customerLogin();
         break;
     case 'D': case 'd':
         adminLogin();
@@ -296,7 +301,7 @@ void addNewUserToFile(userType new_user) {
 }
 
 // CUSTOMERS REGISTER
-void registerPage() {
+void customerRegistration() {
     newPageLogo();
     // Registration loop
     bool loop = true;
@@ -509,7 +514,6 @@ bool checkBookingAvailable(int day, int timeslot, int expert, int hour) {
             if ((bookingsArray[i].timeslot) == timeslot) {
                 return false;
             }
- 
         }
     }
     return true;  // No conflict found, the slot is available
@@ -527,7 +531,6 @@ void saveBookingToFile(bookingType newBooking) {
 
     // Save day as integer
     outFile << newBooking.customerName << ","
-        << newBooking.week << ","
         << newBooking.day << ","
         << newBooking.timeslot << ","
         << newBooking.expert << ","
@@ -617,12 +620,12 @@ void customerPage(string username, string currentPassword) {
 
 // Helper Function to Format Date
 string formatDate(int day) {
-    return to_string(day) + "-10-2024"; // Formats as "Day-10-2024"
+    return to_string(day) + "/" + MONTH; // Formats as "dd-mm-yyyy"
 }
 
 // Helper Function to Get Full Date with Day Name
 string getFullDate(int day) {
-    return getDayName(day) + ", " + formatDate(day); // e.g., "Monday, 1-10-2024"
+    return getDayName(day) + ", " + formatDate(day);
 }
 
 // Customer > My Bookings (Display all bookings made by the current user)
@@ -643,7 +646,6 @@ void mybookingsDetail(string username, string currentPassword) {
         cout << "\t\t\tMy Bookings\n";
         cout << "========================================================================================================================\n";
         cout << setw(4) << left << "No"
-            << setw(4) << left << "Week"
             << setw(15) << left << "Day" // Adjusted Width
             << setw(25) << left << "Time Slot"
             << setw(20) << left << "Expert"
@@ -832,36 +834,15 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
     pauseEnter();
 }
 
-int selectWeek() {
-    newPageLogo();
-    cout << "--------SELECT A WEEK--------\n";
-    cout << "Please select a week (1 = first week, 2 = second week, ..., 5 = fifth week): ";
-
-    int week;
-    while (true) {
-        cin >> week;
-        if (cin.fail() || week < 1 || week > 5) {  // Valid weeks are between 1 and 5
-            cout << "Invalid week. Please enter a number between 1 and 5: ";
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        }
-        else {
-            break;
-        }
-    }
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
-    return week;  // Return the selected week number
-}
-
 // Customer > View Time Slot Available (Display available time slots for all experts)
 void viewTimeslotAvailable(string username, string currentPassword) {
     newPageLogo();
     cout << "\t\t\t\t\t\t\t\tVIEW AVAILABLE TIME SLOTS\n";
 
-    int selectedWeek = selectWeek();
+  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     cout << "==========================================================================================================================================\n";
-    cout << setw(10) << left << "DAY"
+    cout << setw(12) << left << "DAY"
         << setw(18) << "EXPERT"
         << setw(18) << "10:00AM-11:00AM"
         << setw(18) << "11:00AM-12:00PM"
@@ -871,20 +852,20 @@ void viewTimeslotAvailable(string username, string currentPassword) {
         << setw(18) << "5:00PM-6:00PM" << endl;
     cout << "==========================================================================================================================================\n";
 
-    for (int weekday = 1; weekday <= 5; weekday++) {
-        int day = (selectedWeek - 1) * 7 + weekday;
-
-        cout << setw(10) << left << getDayName(day);
-
+    for (int date = 1; date <= MAX_DAYS; date++) {
         for (int exp = 0; exp < 3; exp++) {
             if (exp == 0) {
-                cout << setw(18) << left << EXPERT[exp];
+                cout << setw(12) << left << (to_string(date) + "/" + MONTH);
             }
+            else if (exp == 1) {
+                cout << setw(12) << left << getDayName(date);
+            } 
             else {
-                cout << "          " << setw(18) << left << EXPERT[exp];
+                cout << "            ";
             }
+            cout << setw(18) << left << EXPERT[exp];
             for (int tms = 0; tms < 6; tms++) {
-                if (checkBookingAvailable(day, tms, exp, 1)) {
+                if (checkBookingAvailable(date, tms, exp, 1)) {
                     cout << GREEN << setw(18) << "A" << RESET;
                 }
                 else {
@@ -1007,82 +988,25 @@ int selectService() {
     return choice - 1;
 }
 
-// Customer > Make Booking > Select Service > Select Expert
-int selectExpert(int day, int timeslot, int service) {
-    newPageLogo();
-    array<string, 4> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan", "Auto-assign" };
-
-    cout << "--------SELECT AN EXPERT--------\n";
-    int choice = getChoice(experts);
-
-    // If user selects auto-assign option
-    if (choice == 4) {
-        int assignedExpert = autoAssignExpert(day, timeslot, DURATION[service]);  // Use the modified autoAssignExpert to check availability
-        if (assignedExpert != -1) {
-            cout << "Expert " << EXPERT[assignedExpert] << " has been auto-assigned.\n";
-            pauseEnter();
-            return assignedExpert;
-        }
-        else {
-            return -1;  // Return -1 if no expert is available
-        }
-    }
-
-    // Return selected expert index (adjust for array offset)
-    return choice - 1;
+void printCalendar() {
+    cout << "MON TUE WED THU FRI SAT SUN";
+    //for (i = 0, i < MONDAY)
 }
 
-// Customer > Make Booking > Select Service > Select Expert (random assign expert function)
-int autoAssignExpert(int day, int timeslot, int hour) {
-    array<string, 3> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
-    srand(time(0));
-
-    int availableExperts[3];  // Array to store indices of available experts
-    int countAvailable = 0;   // Counter for the number of available experts
-
-    // Check availability of each expert
-    for (int i = 0; i < experts.size(); i++) {
-        if (checkBookingAvailable(day, timeslot, i, hour)) {
-            availableExperts[countAvailable] = i;  // Add available expert's index
-            countAvailable++;  // Increment the counter
-        }
-    }
-
-    if (countAvailable > 0) {
-        // Randomly select one of the available experts
-        int randomIndex = rand() % countAvailable;
-        return availableExperts[randomIndex];
-    }
-    else {
-        // No available experts
-        cout << "No available expert for the selected time slot." << endl;
-        pauseEnter();
-        return -1;  // Indicate no expert is available
-    }
-}
-
-// Customer > Make Booking > Select Service > Select Date > Select Time Slot
-int selectDayInWeek(int selectedWeek) {
+// Customer > Make Booking >  Select Date
+int selectDate() {
     newPageLogo();
-    array<string, 5> weekdays = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday" };
-    int maxDayInWeek = 7; // Default maximum days in a week
 
-    // If it's the 5th week, only allow Days 29 and 30
-    if (selectedWeek == 5) {
-        weekdays = { "Monday", "Tuesday" };
-        maxDayInWeek = 2;
-    }
+    cout << "--------SELECT A DAY IN " << MONTH << "--------\n\n";
+    printCalendar();
+    int day = 1;
+    cout << "\n\nEnter a day (1-31): ";
+    cin >> day;
 
-    cout << "--------SELECT A DAY IN WEEK " << selectedWeek << "--------\n";
-    int choice = getChoice(weekdays);
-
-    // Calculate the actual day
-    int day = (selectedWeek - 1) * 7 + choice;
-    cout << "Selected date is: " << day << " (" << getDayName(day) << ")\n";
     return day; // Return the selected date
 }
 
-// Customer > Make Booking > Select Service > Select Date > Select Time Slot
+// Customer > Make Booking > Select Timeslot
 int selectTimeSlot(int service) {
     newPageLogo();
     array<string, 3> treatmentTimeSlots = { "Timeslot 1 (10:00AM - 12:00PM)", "Timeslot 2 (2:00PM - 4:00PM)", "Timeslot 3 (4:00PM - 6:00PM)" };
@@ -1120,8 +1044,59 @@ int selectTimeSlot(int service) {
     cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
     return choice - 1;
 }
+// Customer > Make Booking > Select Expert
+int selectExpert(int day, int timeslot, int service) {
+    newPageLogo();
+    array<string, 4> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan", "Auto-assign" };
 
-// Customer > Make Booking > Select Service > Select Date > Select Time Slot > Select Payment Mode
+    cout << "--------SELECT AN EXPERT--------\n";
+    int choice = getChoice(experts);
+
+    // If user selects auto-assign option
+    if (choice == 4) {
+        int assignedExpert = autoAssignExpert(day, timeslot, DURATION[service]);  // Use the modified autoAssignExpert to check availability
+        if (assignedExpert != -1) {
+            cout << "Expert " << EXPERT[assignedExpert] << " has been auto-assigned.\n";
+            pauseEnter();
+            return assignedExpert;
+        }
+        else {
+            return -1;  // Return -1 if no expert is available
+        }
+    }
+
+    // Return selected expert index (adjust for array offset)
+    return choice - 1;
+}
+// Customer > Make Booking > Select Expert (random assign expert function)
+int autoAssignExpert(int day, int timeslot, int hour) {
+    array<string, 3> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
+    srand(time(0));
+
+    int availableExperts[3];  // Array to store indices of available experts
+    int countAvailable = 0;   // Counter for the number of available experts
+
+    // Check availability of each expert
+    for (int i = 0; i < experts.size(); i++) {
+        if (checkBookingAvailable(day, timeslot, i, hour)) {
+            availableExperts[countAvailable] = i;  // Add available expert's index
+            countAvailable++;  // Increment the counter
+        }
+    }
+
+    if (countAvailable > 0) {
+        // Randomly select one of the available experts
+        int randomIndex = rand() % countAvailable;
+        return availableExperts[randomIndex];
+    }
+    else {
+        // No available experts
+        cout << "No available expert for the selected time slot." << endl;
+        pauseEnter();
+        return -1;  // Indicate no expert is available
+    }
+}
+// Customer > Make Booking > Select Payment Mode
 int selectPaymentMode() {
     newPageLogo();
     array<string, 3> paymentModes = { "Credit Card", "Debit Card", "Cash" };
@@ -1145,8 +1120,7 @@ void makeBooking(string username, string currentPassword) {
         return;
     }
 
-    week = selectWeek();             // Choose a week
-    day = selectDayInWeek(week);     // Choose a specific day in that week
+    day = selectDate();
 
     // Validate the day
     if (day > MAX_DAYS) {
@@ -1198,7 +1172,7 @@ void makeBooking(string username, string currentPassword) {
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the input buffer
 
         if (confirm == 'Y' || confirm == 'y') {
-            bookingType newBooking = { customerName, week, day, timeSlot, expert, service, COST[service], paymentMode };
+            bookingType newBooking = { customerName, day, timeSlot, expert, service, COST[service], paymentMode };
             saveBookingToFile(newBooking);
             generateReceipt(newBooking); // Generate the receipt
             cout << "Your booking has been confirmed!\n";

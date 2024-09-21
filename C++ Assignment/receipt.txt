@@ -26,3 +26,17 @@ Payment Method		: Cash
 ||                Thank you for choosing Haven Salon!          ||
 ==================================================================
 
+==================================================================
+||                    Haven Salon - Receipt                     ||
+==================================================================
+Customer Name		: ykliang
+Date			: 30/10/2024
+Time			: 10:00AM - 12:00PM
+Expert			: Alice Wong
+Service			: Hair Dying
+Cost			: RM 80.00
+Payment Method		: Credit Card
+==================================================================
+||                Thank you for choosing Haven Salon!          ||
+==================================================================
+
