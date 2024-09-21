@@ -191,7 +191,6 @@ void aboutUsPage() {
 }
 
 
-
 //------------------------------------------------------USERS FILE
 // Check if username met in registration
 bool checkUsernameAvailable(string username) {
@@ -551,8 +550,6 @@ bool checkBookingAvailable(int day, int timeslot, int expert) {
 
 }
 
-
-
 // Save the booking information to file
 void saveBookingToFile(bookingType newBooking) {
     ofstream outFile(FILE_BOOKINGS, ios::app);
@@ -860,8 +857,6 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
     pauseEnter();
 }
 
-
-
 // Customer > View Time Slot Available (Display available time slots for all experts)
 void viewTimeslotAvailable(string username, string currentPassword) {
     newPageLogo();
@@ -895,8 +890,6 @@ void viewTimeslotAvailable(string username, string currentPassword) {
     pauseEnter();
     customerPage(username, currentPassword);
 }
-
-
 
 // Customer > Feedback Form (Allow customers to provide feedback)
 void feedbackForm(string username, string currentPassword) {
@@ -1057,7 +1050,6 @@ int autoAssignExpert(int day, int timeslot) {
         return -1;  // Indicate no expert is available
     }
 }
-
 
 // Customer > Make Booking > Select Service > Select Date >Select Expert
 int selectDate() {
@@ -1351,7 +1343,6 @@ void viewCustomerBookings(string username) {
     adminPage(username);
 }
 
-
 // Admin > View Sales Record
 void viewSalesRecord(string username) {
     newPageLogo();
@@ -1440,7 +1431,6 @@ void viewBookingSlot(string username) {
     adminPage(username);
 }
 
-
 // Admin > View Feedback (Reads and displays all feedback entries)
 void viewFeedbackForm(string username) {
     newPageLogo();
@@ -1495,32 +1485,3 @@ int main() {
     mainMenu(); // Start the menu
     return 0;
 }
-
-//user.dat (put in the same directory as the cpp file)
-/*
-ykliang,yk123
-qxwong,qx456
-wssoh,ws789
-zqwang,zq000
-
-*/
-
-//service.dat(put in the same directory as the cpp file)
-/*
-HairCut 25.00
-HairWash 15.00
-HairDying 80.00
-Consultation 15.00
-
-*/
-
-//bookings.dat (put in the same directory as the cpp file)
-/*
-
-
-*/
-
-//receipt.txt(put in the same directory as the cpp file)
-/*
-
-*/ //The \n under last record is necessary!
