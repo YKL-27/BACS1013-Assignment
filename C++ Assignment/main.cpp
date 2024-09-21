@@ -68,6 +68,8 @@ int selectPaymentMode();
 int autoAssignExpert(int day, int timeslot, int hour);
 void generateReceipt(const bookingType& booking);
 
+void printSchedule();
+
 void adminLogin();
 void adminPage(string username);
 void adminLogout(string username);
@@ -150,7 +152,7 @@ void newPageLogo() {
 
 // Pause by prompting an input (use string & getline in case user typed in anything)
 void pauseEnter() {
-    cout << YELLOW << "Press Enter to continue...";
+    cout << YELLOW << "Press Enter to continue..." << RESET;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
@@ -836,8 +838,13 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
 
 // Customer > View Time Slot Available (Display available time slots for all experts)
 void viewTimeslotAvailable(string username, string currentPassword) {
+    printSchedule();
+    customerPage(username, currentPassword);
+}
+
+void printSchedule() {
     newPageLogo();
-    cout << "\t\t\t\t\t\t\t\tVIEW AVAILABLE TIME SLOTS\n";
+    cout << "\t\t\t\t\t\t\t\tAVAILABLE TIME SLOTS FOR " << MONTH << endl;
 
     cout << "==========================================================================================================================================\n";
     cout << setw(12) << left << "DAY"
@@ -850,6 +857,7 @@ void viewTimeslotAvailable(string username, string currentPassword) {
         << setw(18) << "5:00PM-6:00PM" << endl;
     cout << "==========================================================================================================================================\n";
 
+    int counter = 0;
     for (int date = 1; date <= MAX_DAYS; date++) {
         for (int exp = 0; exp < 3; exp++) {
             if (exp == 0) {
@@ -857,7 +865,7 @@ void viewTimeslotAvailable(string username, string currentPassword) {
             }
             else if (exp == 1) {
                 cout << setw(12) << left << getDayName(date);
-            } 
+            }
             else {
                 cout << "            ";
             }
@@ -867,17 +875,28 @@ void viewTimeslotAvailable(string username, string currentPassword) {
                     cout << GREEN << setw(18) << "A" << RESET;
                 }
                 else {
-                    cout << RED << setw(18) << "N" << RESET;
+                    if (isWeekend(date)) {
+                        cout << RED << setw(18) << "C" << RESET;
+                    }
+                    else {
+                        cout << YELLOW << setw(18) << "B" << RESET;
+                    }
+
                 }
             }
             cout << endl;
         }
+        counter ++;
+        if (counter == 5) {
+            counter = 0;
+            pauseEnter();
+        }
+
         cout << "------------------------------------------------------------------------------------------------------------------------------------------\n";
     }
 
-    cout << GREEN << "A = AVAILABLE\t" << RED << "N = UNAVAILABLE\n" << RESET;
+    cout << GREEN << "A = AVAILABLE\t" << YELLOW << "B = BOOKED\t" << RED << "C = CLOSED\n\n" << RESET;
     pauseEnter();
-    customerPage(username, currentPassword);
 }
 
 // Customer > Feedback Form (Allow customers to provide feedback)
@@ -1389,79 +1408,7 @@ void viewSalesRecord(string username) {
 
 // Admin > View Expert Booking Slot
 void viewBookingSlot(string username) {
-    newPageLogo();
-
-    // Read booking data
-    int lenBookings = 0;
-    bookingType* bookingsArray = readBookingsFile(lenBookings);
-
-    if (bookingsArray == nullptr || lenBookings == 0) {
-        cout << "No bookings available or file error.\n";
-        pauseEnter();
-        adminPage(username);
-        return;
-    }
-
-    cout << "=====================================================================================================================================\n";
-    cout << setw(10) << left << "DAY"
-        << setw(15) << "EXPERT"
-        << setw(18) << "10:00AM-11:00AM"
-        << setw(18) << "11:00AM-12:00PM"
-        << setw(18) << "2:00PM-3:00PM"
-        << setw(18) << "3:00PM-4:00PM"
-        << setw(18) << "4:00PM-5:00PM"
-        << setw(18) << "5:00PM-6:00PM" << endl;
-    cout << "=====================================================================================================================================\n";
-
-    for (int day = 1; day <= 30; day++) {  // Loop through all the days (1-30)
-        if (isWeekend(day)) {
-            continue;  // Skip weekends
-        }
-
-        for (int i = 0; i < 3; i++) {  // 3 experts per day
-            cout << setw(10) << left << (i == 0 ? formatDate(day) : "")  // Print day for the first expert only
-                << setw(15) << EXPERT[i];  // Print expert name
-
-            for (int k = 0; k < 6; k++) {  // 6 time slots per day
-                bool isBooked = false;
-
-                // Check if the current expert has a booking for this time slot
-                for (int b = 0; b < lenBookings; b++) {
-                    if (bookingsArray[b].expert == i && bookingsArray[b].day == day) {
-                        // If it's a 2-hour slot (non-consultation), we need to block both hours.
-                        if (bookingsArray[b].service != 3 &&
-                            ((bookingsArray[b].timeslot == 0 && (k == 0 || k == 1)) ||  // 10:00AM - 12:00PM covers both 10:00AM-11:00AM and 11:00AM-12:00PM
-                                (bookingsArray[b].timeslot == 1 && (k == 2 || k == 3)) ||  // 2:00PM - 4:00PM covers both 2:00PM-3:00PM and 3:00PM-4:00PM
-                                (bookingsArray[b].timeslot == 2 && (k == 4 || k == 5)))) { // 4:00PM - 6:00PM covers both 4:00PM-5:00PM and 5:00PM-6:00PM
-                            isBooked = true;
-                            break;
-                        }
-                        // For 1-hour slots (consultation), only block the specific hour
-                        if (bookingsArray[b].service == 3 && bookingsArray[b].timeslot == k) {
-                            isBooked = true;
-                            break;
-                        }
-                    }
-                }
-
-                // Output the booking status for the current expert and time slot
-                if (isBooked) {
-                    cout << RED << setw(18) << "B" << RESET;
-                }
-                else {
-                    cout << GREEN << setw(18) << "A" << RESET;
-                }
-            }
-
-            cout << endl;
-        }
-
-        // Add a separator between different days
-        cout << "-------------------------------------------------------------------------------------------------------------------------------------\n";
-    }
-
-    cout << GREEN << "A = AVAILABLE\t" << RED << "B = BOOKED\n" << RESET;
-    pauseEnter();
+    printSchedule();
     adminPage(username);
 }
 
