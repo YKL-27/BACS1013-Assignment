@@ -28,12 +28,12 @@ struct userType {
 
 struct bookingType {
     string customerName;
-    int day = 0; // Represents the day of the month (1-31)
-    int timeslot = 0;
-    int expert = 0;
-    int service = 0;
-    double cost = 0.0;
-    int payment_mode = 0;
+    int day = 0;            // Represents the day of the month (1-31)
+    int timeslot = 0;       // Index of TIMESLOT[]
+    int expert = 0;         // Index of EXPERT[]
+    int service = 0;        // Index of SERVICE[]
+    double cost = 0.0;      // Cost of the service
+    int payment_mode = 0;   // Index of PAYMENTMODE[]
 };
 
 // FUNCTION PROTOTYPES------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ void viewSalesRecord(string username);
 void viewBookingSlot(string username);
 void viewFeedbackForm(string username);
 
-// GLOBAL CONSTANT & VARIABLES------------------------------------------------------------------------------------------------------------------------------------------------------
+// GLOBAL CONSTANTS------------------------------------------------------------------------------------------------------------------------------------------------------
 const string FILE_USERS = "users.dat";
 const string FILE_BOOKINGS = "bookings.dat";
 
@@ -503,9 +503,9 @@ bool checkBookingAvailable(int day, int timeslot, int expert, int hour) {
         if (bookingsArray[i].day == day && bookingsArray[i].expert == expert) {
 
             // Check the duration of the service, (1 or 2 hour)
-            if (DURATION[bookingsArray[i].service] == 2) {
+            if (hour == 2) {
                 // If 2 hours, check the second hour
-                if ((bookingsArray[i].timeslot + 1) == timeslot) {
+                if (bookingsArray[i].timeslot == (timeslot+1)) {
                     return false;
                 }
             }
@@ -839,8 +839,6 @@ void viewTimeslotAvailable(string username, string currentPassword) {
     newPageLogo();
     cout << "\t\t\t\t\t\t\t\tVIEW AVAILABLE TIME SLOTS\n";
 
-  //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
     cout << "==========================================================================================================================================\n";
     cout << setw(12) << left << "DAY"
         << setw(18) << "EXPERT"
@@ -855,7 +853,7 @@ void viewTimeslotAvailable(string username, string currentPassword) {
     for (int date = 1; date <= MAX_DAYS; date++) {
         for (int exp = 0; exp < 3; exp++) {
             if (exp == 0) {
-                cout << setw(12) << left << (to_string(date) + "/" + MONTH);
+                cout << setw(12) << left << formatDate(date);
             }
             else if (exp == 1) {
                 cout << setw(12) << left << getDayName(date);
@@ -1131,11 +1129,11 @@ void makeBooking(string username, string currentPassword) {
     }
 
     timeSlot = selectTimeSlot(service); // Choose a time slot
-    // convert 1,2,3, to 0, 2, 4
-    if (DURATION[service] == 2){
+    // convert 0,1,2,3 to 0, 2, 4
+    /*if (DURATION[service] == 2) {
         timeSlot *= 2;
         cout << timeSlot;
-    }
+    }*/
 
     bool isConsultation = (service == 3); // Check if it's a consultation
 

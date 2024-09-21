@@ -1,11 +1,12 @@
+
 ==================================================================
 ||                    Haven Salon - Receipt                     ||
 ==================================================================
 Customer Name		: ykliang
-Date			: 4-10-2024
-Time			: 10:00AM - 12:00PM
-Expert			: Bernice Lim
-Service			: Hair Wash
+Date			: 1/10/2024
+Time			: 11:00AM - 12:00PM
+Expert			: Alice Wong
+Service			: Styling Consultation
 Cost			: RM 15.00
 Payment Method		: Credit Card
 ==================================================================
@@ -16,25 +17,11 @@ Payment Method		: Credit Card
 ||                    Haven Salon - Receipt                     ||
 ==================================================================
 Customer Name		: ykliang
-Date			: 8-10-2024
-Time			: 4:00PM - 6:00PM
+Date			: 1/10/2024
+Time			: 10:00AM - 12:00PM
 Expert			: Alice Wong
 Service			: Hair Cut
 Cost			: RM 25.00
-Payment Method		: Cash
-==================================================================
-||                Thank you for choosing Haven Salon!          ||
-==================================================================
-
-==================================================================
-||                    Haven Salon - Receipt                     ||
-==================================================================
-Customer Name		: ykliang
-Date			: 30/10/2024
-Time			: 10:00AM - 12:00PM
-Expert			: Alice Wong
-Service			: Hair Dying
-Cost			: RM 80.00
 Payment Method		: Credit Card
 ==================================================================
 ||                Thank you for choosing Haven Salon!          ||
