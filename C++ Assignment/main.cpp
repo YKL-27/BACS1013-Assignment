@@ -145,7 +145,7 @@ void newPageLogo() {
 
 // Pause by prompting an input (use string & getline in case user typed in anything)
 void pauseEnter() {
-    cout << "Press Enter to continue...";
+    cout << YELLOW << "Press Enter to continue...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
@@ -201,8 +201,7 @@ void aboutUsPage() {
     ifstream aboutUsFile("aboutUs.txt");
 
     if (!aboutUsFile) {
-        cerr << "Error: Could not open aboutUs.txt" << endl;
-        cout << "Press Enter to return to main menu.";
+        cerr << RED << "Error: Could not open aboutUs.txt" << endl;
         pauseEnter();
         mainMenu();
     }
@@ -217,8 +216,6 @@ void aboutUsPage() {
 
     // Close the file
     aboutUsFile.close();
-
-    cout << "Press Enter to return to main menu:\t";
     pauseEnter();
     mainMenu();
 }
@@ -230,7 +227,7 @@ bool checkUsernameAvailable(string username) {
 
     ifstream infile(FILE_USERS);
     if (!infile) {
-        cout << "\n\nUnable to access user data currently.\nPress enter to return to main menu\t";
+        cout << RED << "\n\nUnable to access user data currently.\n";
         pauseEnter();
         mainMenu();
     }
@@ -289,7 +286,7 @@ void addNewUserToFile(userType new_user) {
     ofstream outFile(FILE_USERS, ios::app); // Open file in append mode
 
     if (!outFile) {
-        cout << "Sorry, an error occurred while opening the file.";
+        cout << RED << "Sorry, an error occurred while opening the file.";
         return;
     }
 
@@ -368,7 +365,7 @@ void customerLogin() {
 
     ifstream infile(FILE_USERS);
     if (!infile) {
-        cout << "\n\nUnable to login currently due to system error\nPress enter to return to main menu\t";
+        cout << RED << "\n\nUnable to login currently due to system error\n";
         pauseEnter();
         mainMenu();
     }
@@ -413,14 +410,14 @@ void customerLogin() {
             }
         }
         if (recordFound) {
-            cout << "\n\nAccess granted\nPress enter to continue\t";
+            cout << GREEN << "\n\nAccess granted\n";
             pauseEnter();
             customerPage(inputUsername, currentPassword); // Pass username and password to the customer page
             return;
         }
         else {
             char option;
-            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N):\t";
+            cout << RED << "\n\nAccess denied\n" << RESET << "Do you wish to retry ? (Y / N) : \t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -436,7 +433,7 @@ bookingType* readBookingsFile(int& lenBookings) {
 
     ifstream infile(FILE_BOOKINGS);
     if (!infile) {
-        cout << "\n\nUnable to access booking data currently.\nPress enter to return to main menu\t";
+        cout << RED << "\n\nUnable to access booking data currently.\n";
         pauseEnter();
         lenBookings = 0; // Set length to 0 if there's an error
         return nullptr;  // Return nullptr to indicate an error
@@ -524,7 +521,7 @@ void saveBookingToFile(bookingType newBooking) {
     ofstream outFile(FILE_BOOKINGS, ios::app);
 
     if (!outFile) {
-        cout << "Sorry, an error occurred while saving the booking.";
+        cout << RED << "Sorry, an error occurred while saving the booking.";
         return;
     }
 
@@ -584,7 +581,6 @@ void customerPage(string username, string currentPassword) {
         }
         cout << "---------------------------\n";
 
-        cout << "Press enter to return:\t";
         pauseEnter();
         customerPage(username, currentPassword);
         break;
@@ -636,7 +632,7 @@ void mybookingsDetail(string username, string currentPassword) {
     bookingType* bookingsArray = readBookingsFile(lenBookings);
 
     if (bookingsArray == nullptr || lenBookings == 0) {
-        cout << "No bookings available or file error.\n";
+        cout << RED << "No bookings available or file error.\n";
         pauseEnter();
         customerPage(username, currentPassword);
         return;
@@ -682,7 +678,6 @@ void mybookingsDetail(string username, string currentPassword) {
         if (bookingCount == 0) {
             cout << "You have no bookings.\n";
             cout << "========================================================================================================================\n";
-            cout << "Press Enter to return:\t";
             pauseEnter();
             customerPage(username, currentPassword);
             return;
@@ -722,7 +717,7 @@ void cancelBooking(string username, string currentPassword, bookingType* booking
 
     if (inputPassword != currentPassword) {
         cout << "Authentication failed. Incorrect password.\n";
-        cout << "Press Enter to Try Again:";
+
         pauseEnter();
         return;
     }
@@ -784,7 +779,6 @@ void cancelBooking(string username, string currentPassword, bookingType* booking
     outFile.close();
 
     cout << "Booking cancelled successfully.\n";
-    cout << "Press Enter to return:\t";
     pauseEnter();
 
     // Return and update My Bookings
@@ -835,7 +829,6 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
     cout << "==================================================================\n\n";
 
     // Pause after viewing the receipt
-    cout << "Press Enter to Return:";
     pauseEnter();
 }
 
@@ -936,7 +929,6 @@ void feedbackForm(string username, string currentPassword) {
     feedbackFile.close();
 
     cout << "Thank you for your feedback!\n";
-    cout << "Press enter to return:\t";
     pauseEnter();
     customerPage(username, currentPassword);
 }
@@ -979,7 +971,7 @@ int selectService() {
     ifstream inFile("services.dat");
 
     if (!inFile) {
-        cerr << "Error: Could not open the services file." << endl;
+        cerr << RED << "Error: Could not open the services file." << endl;
         return -1;
     }
 
@@ -1064,7 +1056,6 @@ int autoAssignExpert(int day, int timeslot, int hour) {
     else {
         // No available experts
         cout << "No available expert for the selected time slot." << endl;
-        cout << "Press Enter to return:";
         pauseEnter();
         return -1;  // Indicate no expert is available
     }
@@ -1148,7 +1139,7 @@ void makeBooking(string username, string currentPassword) {
 
     service = selectService();       // Choose a service
     if (service == -1) { // Error in selecting service
-        cout << "Error in selecting service. Returning to customer page.\n";
+        cout << RED << "Error in selecting service.\n";
         pauseEnter();
         customerPage(username, currentPassword);
         return;
@@ -1273,7 +1264,7 @@ void adminLogin() {
         getline(cin, inputPassword);
 
         if (inputUsername == "havensadmin" && inputPassword == "haven1234") {
-            cout << "\n\nAccess granted\nPress enter to continue\t";
+            cout << GREEN << "\n\nAccess granted\n";
             loop = false;
             pauseEnter();
             adminPage(inputUsername);
@@ -1281,7 +1272,7 @@ void adminLogin() {
         }
         else {
             char option;
-            cout << "\n\nAccess denied\nDo you wish to retry? (Y/N):\t";
+            cout << RED << "\n\nAccess denied\n" << RESET << "Do you wish to retry? (Y/N):\t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -1386,7 +1377,6 @@ void viewCustomerBookings(string username) {
     }
 
     cout << "==========================================================================================================================================\n";
-    cout << "Press Enter to return:\t";
     pauseEnter();
     adminPage(username);
 }
@@ -1399,7 +1389,7 @@ void viewSalesRecord(string username) {
     bookingType* bookingsArray = readBookingsFile(lenBookings);
 
     if (bookingsArray == nullptr || lenBookings == 0) {
-        cout << "Error: Could not retrieve booking data." << endl;
+        cout << RED << "Error: Could not retrieve booking data." << endl;
         pauseEnter();
         return;
     }
@@ -1421,7 +1411,6 @@ void viewSalesRecord(string username) {
     cout << "==============================================\n";
     cout << "Total Sales: RM " << fixed << setprecision(2) << totalSales << endl;
 
-    cout << "\nPress enter to return:\t";
     pauseEnter();
     adminPage(username);
 }
@@ -1500,7 +1489,6 @@ void viewBookingSlot(string username) {
     }
 
     cout << GREEN << "A = AVAILABLE\t" << RED << "B = BOOKED\n" << RESET;
-    cout << "Press Enter to return:\t";
     pauseEnter();
     adminPage(username);
 }
@@ -1512,7 +1500,7 @@ void viewFeedbackForm(string username) {
     ifstream feedbackFile("feedback.dat");
 
     if (!feedbackFile) {
-        cout << "Error: Could not open feedback file.\n";
+        cout << RED << "Error: Could not open feedback file.\n";
         pauseEnter();
         adminPage(username);
         return;
@@ -1535,7 +1523,6 @@ void viewFeedbackForm(string username) {
     }
 
     cout << "\n---------------------------------------------------------\n";
-    cout << "Press Enter to return:";
     pauseEnter();
     adminPage(username);
 }
