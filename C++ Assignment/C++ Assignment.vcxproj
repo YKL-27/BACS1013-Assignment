@@ -131,10 +131,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bookings.dat" />
-    <None Include="service.dat" />
-    <None Include="user.dat" />
+    <None Include="services.dat" />
+    <None Include="users.dat" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="aboutUS.txt" />
     <Text Include="receipt.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

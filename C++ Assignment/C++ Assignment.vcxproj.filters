@@ -21,10 +21,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bookings.dat" />
-    <None Include="user.dat" />
-    <None Include="service.dat" />
+    <None Include="users.dat" />
+    <None Include="services.dat" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="receipt.txt" />
+    <Text Include="aboutUS.txt" />
   </ItemGroup>
 </Project>

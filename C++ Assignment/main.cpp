@@ -8,7 +8,6 @@
 #include <ctime>
 #include <array>
 //#include <conio.h>
-
 #define RESET   "\033[0m"
 #define RED     "\033[31m"      /* Red */
 #define GREEN   "\033[32m"      /* Green */
@@ -29,7 +28,7 @@ struct userType {
 
 struct bookingType {
     string customerName;
-    int day = 0; // Represents the day of the month (1-30)
+    int day = 0; // Represents the day of the month (1-31)
     int timeslot = 0;
     int expert = 0;
     int service = 0;
@@ -64,8 +63,6 @@ void makeBooking(string username, string currentPassword);
 int selectService();
 int selectExpert(int day, int timeslot);
 int selectWeek();
-int selectDayOfWeek();
-int selectDate();
 int selectTimeSlot(int service);
 int selectPaymentMode();
 int autoAssignExpert(int day, int timeslot);
@@ -80,13 +77,14 @@ void viewBookingSlot(string username);
 void viewFeedbackForm(string username);
 
 // GLOBAL CONSTANT & VARIABLES------------------------------------------------------------------------------------------------------------------------------------------------------
-const string FILE_USERS = "user.dat";
+const string FILE_USERS = "users.dat";
 const string FILE_BOOKINGS = "bookings.dat";
 const int MAX_DAYS = 30; // Supports up to 30 days
 const string TREATMENT_TIMESLOT[3] = { "10:00AM - 12:00PM", "2:00PM - 4:00PM","4:00PM - 6:00PM" };
 const string TIMESLOT_CONSULT[6] = { "10:00AM - 11:00AM", "11:00AM - 12:00PM", "2:00PM - 3:00PM", "3:00PM - 4:00PM" , "4:00PM - 5:00PM", "5:00PM - 6:00PM" };
 const string EXPERT[3] = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
 const string SERVICE[4] = { "Hair Cut", "Hair Wash", "Hair Dying", "Styling Consultation" };
+const int DURATION[4] = { 2,2,2,1 };
 const string PAYMENTMODE[3] = { "Credit Card", "Debit Card", "Cash" };
 const double COST[4] = { 25.00, 15.00, 80.00, 15.00 };
 
@@ -501,32 +499,25 @@ bool checkBookingAvailable(int day, int timeslot, int expert) {
     for (int i = 0; i < lenBookings; i++) {
         // Check if the booking is for the same day and expert
         if (bookingsArray[i].day == day && bookingsArray[i].expert == expert) {
-            // Handle conflict between 2-hour treatment slots and 1-hour consultation slots
 
-            // Check for treatment service conflicts (2-hour slots)
-            if (bookingsArray[i].service != 3) {  // Treatment service (2-hour slot)
-                if ((bookingsArray[i].timeslot == 0 && (timeslot == 0 || timeslot == 1)) ||   // 10:00AM - 12:00PM overlaps with 10:00AM - 11:00AM or 11:00AM - 12:00PM
-                    (bookingsArray[i].timeslot == 1 && (timeslot == 2 || timeslot == 3)) ||   // 2:00PM - 4:00PM overlaps with 2:00PM - 3:00PM or 3:00PM - 4:00PM
-                    (bookingsArray[i].timeslot == 2 && (timeslot == 4 || timeslot == 5))) {   // 4:00PM - 6:00PM overlaps with 4:00PM - 5:00PM or 5:00PM - 6:00PM
+            // Check the duration of the service, (1 or 2 hour)
+            if (DURATION[bookingsArray[i].service] == 2) {
+                // If 2 hours, check the second hour
+                if ((bookingsArray[i].timeslot + 1) == timeslot) {
                     return false;
                 }
             }
 
-            // Check for consultation service conflicts (1-hour slots)
-            if (bookingsArray[i].service == 3) {  // Consultation service (1-hour slot)
-                if (timeslot == bookingsArray[i].timeslot) {  // Exact time slot overlap
-                    return false;
-                }
-                if ((bookingsArray[i].timeslot == 1 && timeslot == 0) ||  // Consultation 11:00AM - 12:00PM prevents 10:00AM - 12:00PM treatment
-                    (bookingsArray[i].timeslot == 3 && timeslot == 2) ||  // Consultation 3:00PM - 4:00PM prevents 2:00PM - 4:00PM treatment
-                    (bookingsArray[i].timeslot == 5 && timeslot == 4)) {  // Consultation 5:00PM - 6:00PM prevents 4:00PM - 6:00PM treatment
-                    return false;
-                }
+            // By default, the starting hour is not available
+            if ((bookingsArray[i].timeslot) == timeslot) {
+                return false;
             }
+ 
         }
     }
     return true;  // No conflict found, the slot is available
 }
+
 
 // Save the booking information to file
 void saveBookingToFile(bookingType newBooking) {
@@ -558,13 +549,12 @@ void customerPage(string username, string currentPassword) {
     cout << "Welcome " << username << endl;
     cout << "Please choose your option.\n";
 
-    cout << "A\t: View Service\n";
-    cout << "B\t: View Expert\n";
+    cout << "A\t: View Service and Expert\n";
+    cout << "B\t: View Available Time Slots\n";
     cout << "C\t: Make Booking\n";
     cout << "D\t: My Bookings\n";
-    cout << "E\t: View Available Time Slots\n";
-    cout << "F\t: Feedback Form\n";
-    cout << "G\t: Log Out and Return to Main Menu\n\n";
+    cout << "E\t: Feedback Form\n";
+    cout << "F\t: Log Out and Return to Main Menu\n\n";
 
     cout << "Enter your choice:\t";
     cin >> option;
@@ -573,24 +563,33 @@ void customerPage(string username, string currentPassword) {
     switch (option) {
     case 'A': case 'a':
         newPageLogo();
+
+        // Display Services 
         cout << "--------OUR SERVICES--------\n";
-        cout << "1. Hair Cut\n";
-        cout << "2. Hair Wash\n";
-        cout << "3. Hair Dying\n";
-        cout << "4. Styling Consultation\n\n";
+        cout << setw(30) << left << "Service" << setw(10) << "Price (RM)\n";
+        cout << "------------------------------------------\n";
+        for (int i = 0; i < 4; i++) {
+            cout << setw(30) << left << SERVICE[i]
+                << setw(10) << right << fixed << setprecision(2) << COST[i] << endl;
+        }
+        cout << "------------------------------------------\n";
+
+        // Display Experts 
+        cout << "\n--------OUR EXPERTS--------\n";
+        cout << setw(10) << left << "Expert Name\n";
+        cout << "---------------------------\n";
+        for (int i = 0; i < 3; i++) {
+            cout << setw(20) << left << EXPERT[i] << endl;
+        }
+        cout << "---------------------------\n";
+
         cout << "Press enter to return:\t";
         pauseEnter();
         customerPage(username, currentPassword);
         break;
     case 'B': case 'b':
         newPageLogo();
-        cout << "--------OUR EXPERTS--------\n";
-        cout << "1. Alice Wong\n";
-        cout << "2. Bernice Lim\n";
-        cout << "3. Catherine Tan\n\n";
-        cout << "Press enter to return\t";
-        pauseEnter();
-        customerPage(username, currentPassword);
+        viewTimeslotAvailable(username, currentPassword);
         break;
     case 'C': case 'c':
         makeBooking(username, currentPassword);
@@ -599,9 +598,6 @@ void customerPage(string username, string currentPassword) {
         mybookingsDetail(username, currentPassword);
         break;
     case 'E': case 'e':
-        viewTimeslotAvailable(username, currentPassword);
-        break;
-    case 'F': case 'f':
         cout << "\nDo you wish to write down your feedback? (Y/N):\t";
         cin >> option2;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -612,7 +608,7 @@ void customerPage(string username, string currentPassword) {
             customerPage(username, currentPassword);
         }
         break;
-    case 'G': case 'g':
+    case 'F': case 'f':
         customerLogout(username, currentPassword);
         break;
     default:
@@ -866,8 +862,6 @@ int selectWeek() {
     return week;  // Return the selected week number
 }
 
-
-
 // Customer > View Time Slot Available (Display available time slots for all experts)
 void viewTimeslotAvailable(string username, string currentPassword) {
     newPageLogo();
@@ -887,16 +881,20 @@ void viewTimeslotAvailable(string username, string currentPassword) {
         << setw(18) << "5:00PM-6:00PM" << endl;
     cout << "==========================================================================================================================================\n";
 
-
     for (int weekday = 1; weekday <= 5; weekday++) {
         int day = (selectedWeek - 1) * 7 + weekday;
 
         cout << setw(10) << left << getDayName(day);
 
-        for (int i = 0; i < 3; i++) {
-            cout << setw(18) << EXPERT[i];
-            for (int k = 0; k < 6; k++) {
-                if (checkBookingAvailable(day, k, i)) {
+        for (int exp = 0; exp < 3; exp++) {
+            if (exp == 0) {
+                cout << setw(18) << left << EXPERT[exp];
+            }
+            else {
+                cout << "          " << setw(18) << left << EXPERT[exp];
+            }
+            for (int tms = 0; tms < 6; tms++) {
+                if (checkBookingAvailable(day, tms, exp)) {
                     cout << GREEN << setw(18) << "A" << RESET;
                 }
                 else {
@@ -909,12 +907,9 @@ void viewTimeslotAvailable(string username, string currentPassword) {
     }
 
     cout << GREEN << "A = AVAILABLE\t" << RED << "N = UNAVAILABLE\n" << RESET;
-    cout << "Press Enter to return:\t";
     pauseEnter();
     customerPage(username, currentPassword);
 }
-
-
 
 // Customer > Feedback Form (Allow customers to provide feedback)
 void feedbackForm(string username, string currentPassword) {
@@ -1175,6 +1170,12 @@ void makeBooking(string username, string currentPassword) {
     }
 
     timeSlot = selectTimeSlot(service); // Choose a time slot
+    // convert 1,2,3, to 0, 2, 4
+    if (DURATION[service] == 2){
+        timeSlot *= 2;
+        cout << timeSlot;
+    }
+
 
     bool isConsultation = (service == 3); // Check if it's a consultation
 
@@ -1188,7 +1189,7 @@ void makeBooking(string username, string currentPassword) {
 
     paymentMode = selectPaymentMode(); // Choose payment method
 
-    bool available = checkBookingAvailable(day, timeSlot, expert);
+    bool available = checkBookingAvailable(day, timeSlot, service);
 
     if (available) {
         char confirm;
@@ -1472,9 +1473,20 @@ void viewBookingSlot(string username) {
 
                 // Check if the current expert has a booking for this time slot
                 for (int b = 0; b < lenBookings; b++) {
-                    if (bookingsArray[b].expert == i && bookingsArray[b].day == day && bookingsArray[b].timeslot == k) {
-                        isBooked = true;
-                        break;
+                    if (bookingsArray[b].expert == i && bookingsArray[b].day == day) {
+                        // If it's a 2-hour slot (non-consultation), we need to block both hours.
+                        if (bookingsArray[b].service != 3 &&
+                            ((bookingsArray[b].timeslot == 0 && (k == 0 || k == 1)) ||  // 10:00AM - 12:00PM covers both 10:00AM-11:00AM and 11:00AM-12:00PM
+                                (bookingsArray[b].timeslot == 1 && (k == 2 || k == 3)) ||  // 2:00PM - 4:00PM covers both 2:00PM-3:00PM and 3:00PM-4:00PM
+                                (bookingsArray[b].timeslot == 2 && (k == 4 || k == 5)))) { // 4:00PM - 6:00PM covers both 4:00PM-5:00PM and 5:00PM-6:00PM
+                            isBooked = true;
+                            break;
+                        }
+                        // For 1-hour slots (consultation), only block the specific hour
+                        if (bookingsArray[b].service == 3 && bookingsArray[b].timeslot == k) {
+                            isBooked = true;
+                            break;
+                        }
                     }
                 }
 
@@ -1556,34 +1568,12 @@ int main() {
     return 0;
 }
 
-//user.dat (put in the same directory as the cpp file)
-/*
-ykliang,yk123
-qxwong,qx456
-wssoh,ws789
-zqwang,zq000
-
-*/
-
-//service.dat(put in the same directory as the cpp file)
-/*
-HairCut 25.00
-HairWash 15.00
-HairDying 80.00
-Consultation 15.00
-
-*/
-
-//bookings.dat (put in the same directory as the cpp file)
-/*
 
 
-*/
 
-//receipt.txt(put in the same directory as the cpp file)
-/*
 
-*/ //The \n under last record is necessary!
+
+
 
 
 
