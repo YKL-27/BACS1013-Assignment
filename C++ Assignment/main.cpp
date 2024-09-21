@@ -28,6 +28,7 @@ struct userType {
 
 struct bookingType {
     string customerName;
+    int week = 1;
     int day = 0; // Represents the day of the month (1-31)
     int timeslot = 0;
     int expert = 0;
@@ -56,16 +57,16 @@ void viewTimeslotAvailable(string username, string currentPassword);
 void feedbackForm(string username, string currentPassword);
 
 bookingType* readBookingsFile(int& lenBookings);
-bool checkBookingAvailable(int day, int timeslot, int expert);
+bool checkBookingAvailable(int day, int timeslot, int expert, int hour);
 void saveBookingToFile(bookingType newBooking);
 
 void makeBooking(string username, string currentPassword);
 int selectService();
-int selectExpert(int day, int timeslot);
+int selectExpert(int day, int timeslot, int service);
 int selectWeek();
 int selectTimeSlot(int service);
 int selectPaymentMode();
-int autoAssignExpert(int day, int timeslot);
+int autoAssignExpert(int day, int timeslot, int hour);
 void generateReceipt(const bookingType& booking);
 
 void adminLogin();
@@ -93,7 +94,6 @@ int getDayOfWeek(int day) {
     // Assuming day 1 is Monday
     return ((day - 1) % 7) + 1;
 }
-
 
 // Checks if a given day is a weekend (Saturday or Sunday)
 bool isWeekend(int day) {
@@ -483,7 +483,7 @@ bookingType* readBookingsFile(int& lenBookings) {
 }
 
 // Check if booking is available based on day, timeslot, and expert
-bool checkBookingAvailable(int day, int timeslot, int expert) {
+bool checkBookingAvailable(int day, int timeslot, int expert, int hour) {
     if (isWeekend(day)) {
         return false; // Salon is closed on weekends
     }
@@ -530,6 +530,7 @@ void saveBookingToFile(bookingType newBooking) {
 
     // Save day as integer
     outFile << newBooking.customerName << ","
+        << newBooking.week << ","
         << newBooking.day << ","
         << newBooking.timeslot << ","
         << newBooking.expert << ","
@@ -617,18 +618,16 @@ void customerPage(string username, string currentPassword) {
         customerPage(username, currentPassword); // Return to customer page for a retry
     }
 }
-// Helper Function to Format Date
+
 // Helper Function to Format Date
 string formatDate(int day) {
     return to_string(day) + "-10-2024"; // Formats as "Day-10-2024"
 }
 
-
 // Helper Function to Get Full Date with Day Name
 string getFullDate(int day) {
     return getDayName(day) + ", " + formatDate(day); // e.g., "Monday, 1-10-2024"
 }
-
 
 // Customer > My Bookings (Display all bookings made by the current user)
 void mybookingsDetail(string username, string currentPassword) {
@@ -648,6 +647,7 @@ void mybookingsDetail(string username, string currentPassword) {
         cout << "\t\t\tMy Bookings\n";
         cout << "========================================================================================================================\n";
         cout << setw(4) << left << "No"
+            << setw(4) << left << "Week"
             << setw(15) << left << "Day" // Adjusted Width
             << setw(25) << left << "Time Slot"
             << setw(20) << left << "Expert"
@@ -713,7 +713,6 @@ void mybookingsDetail(string username, string currentPassword) {
         }
     }
 }
-
 
 void cancelBooking(string username, string currentPassword, bookingType* bookingsArray, int lenBookings, int* bookingIndices, int bookingCount) {
     // Authentication with password same as login password
@@ -840,7 +839,6 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
     pauseEnter();
 }
 
-
 int selectWeek() {
     newPageLogo();
     cout << "--------SELECT A WEEK--------\n";
@@ -866,7 +864,6 @@ int selectWeek() {
 void viewTimeslotAvailable(string username, string currentPassword) {
     newPageLogo();
     cout << "\t\t\t\t\t\t\t\tVIEW AVAILABLE TIME SLOTS\n";
-
 
     int selectedWeek = selectWeek();
 
@@ -894,7 +891,7 @@ void viewTimeslotAvailable(string username, string currentPassword) {
                 cout << "          " << setw(18) << left << EXPERT[exp];
             }
             for (int tms = 0; tms < 6; tms++) {
-                if (checkBookingAvailable(day, tms, exp)) {
+                if (checkBookingAvailable(day, tms, exp, 1)) {
                     cout << GREEN << setw(18) << "A" << RESET;
                 }
                 else {
@@ -1019,7 +1016,7 @@ int selectService() {
 }
 
 // Customer > Make Booking > Select Service > Select Expert
-int selectExpert(int day, int timeslot) {
+int selectExpert(int day, int timeslot, int service) {
     newPageLogo();
     array<string, 4> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan", "Auto-assign" };
 
@@ -1028,7 +1025,7 @@ int selectExpert(int day, int timeslot) {
 
     // If user selects auto-assign option
     if (choice == 4) {
-        int assignedExpert = autoAssignExpert(day, timeslot);  // Use the modified autoAssignExpert to check availability
+        int assignedExpert = autoAssignExpert(day, timeslot, DURATION[service]);  // Use the modified autoAssignExpert to check availability
         if (assignedExpert != -1) {
             cout << "Expert " << EXPERT[assignedExpert] << " has been auto-assigned.\n";
             pauseEnter();
@@ -1044,7 +1041,7 @@ int selectExpert(int day, int timeslot) {
 }
 
 // Customer > Make Booking > Select Service > Select Expert (random assign expert function)
-int autoAssignExpert(int day, int timeslot) {
+int autoAssignExpert(int day, int timeslot, int hour) {
     array<string, 3> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
     srand(time(0));
 
@@ -1053,7 +1050,7 @@ int autoAssignExpert(int day, int timeslot) {
 
     // Check availability of each expert
     for (int i = 0; i < experts.size(); i++) {
-        if (checkBookingAvailable(day, timeslot, i)) {
+        if (checkBookingAvailable(day, timeslot, i, hour)) {
             availableExperts[countAvailable] = i;  // Add available expert's index
             countAvailable++;  // Increment the counter
         }
@@ -1093,7 +1090,6 @@ int selectDayInWeek(int selectedWeek) {
     cout << "Selected date is: " << day << " (" << getDayName(day) << ")\n";
     return day; // Return the selected date
 }
-
 
 // Customer > Make Booking > Select Service > Select Date > Select Time Slot
 int selectTimeSlot(int service) {
@@ -1176,10 +1172,9 @@ void makeBooking(string username, string currentPassword) {
         cout << timeSlot;
     }
 
-
     bool isConsultation = (service == 3); // Check if it's a consultation
 
-    expert = selectExpert(day, timeSlot); // Select expert
+    expert = selectExpert(day, timeSlot, service); // Select expert
     if (expert == -1) {
         // If no available expert, return to customer page
         pauseEnter();
@@ -1189,7 +1184,7 @@ void makeBooking(string username, string currentPassword) {
 
     paymentMode = selectPaymentMode(); // Choose payment method
 
-    bool available = checkBookingAvailable(day, timeSlot, service);
+    bool available = checkBookingAvailable(day, timeSlot, expert, DURATION[service]);
 
     if (available) {
         char confirm;
@@ -1212,7 +1207,7 @@ void makeBooking(string username, string currentPassword) {
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the input buffer
 
         if (confirm == 'Y' || confirm == 'y') {
-            bookingType newBooking = { customerName, day, timeSlot, expert, service, COST[service], paymentMode };
+            bookingType newBooking = { customerName, week, day, timeSlot, expert, service, COST[service], paymentMode };
             saveBookingToFile(newBooking);
             generateReceipt(newBooking); // Generate the receipt
             cout << "Your booking has been confirmed!\n";
@@ -1264,7 +1259,6 @@ void generateReceipt(const bookingType& booking) {
 
     cout << "Receipt has been saved to 'receipt.txt'.\n";
 }
-
 
 // ADMIN LOGIN
 void adminLogin() {
@@ -1397,7 +1391,6 @@ void viewCustomerBookings(string username) {
     adminPage(username);
 }
 
-
 // Admin > View Sales Record
 void viewSalesRecord(string username) {
     newPageLogo();
@@ -1512,7 +1505,6 @@ void viewBookingSlot(string username) {
     adminPage(username);
 }
 
-
 // Admin > View Feedback (Reads and displays all feedback entries)
 void viewFeedbackForm(string username) {
     newPageLogo();
@@ -1567,15 +1559,3 @@ int main() {
     mainMenu(); // Start the menu
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
