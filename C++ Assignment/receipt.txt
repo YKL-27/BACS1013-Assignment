@@ -27,3 +27,31 @@ Payment Method		: Credit Card
 ||                Thank you for choosing Haven Salon!          ||
 ==================================================================
 
+==================================================================
+||                    Haven Salon - Receipt                     ||
+==================================================================
+Customer Name		: ykliang
+Date			: 4/10/2024
+Time			: 2:00PM - 4:00PM
+Expert			: Bernice Lim
+Service			: Hair Cut
+Cost			: RM 25.00
+Payment Method		: Credit Card
+==================================================================
+||                Thank you for choosing Haven Salon!          ||
+==================================================================
+
+==================================================================
+||                    Haven Salon - Receipt                     ||
+==================================================================
+Customer Name		: ykliang
+Date			: 9/10/2024
+Time			: 10:00AM - 12:00PM
+Expert			: Catherine Tan
+Service			: Hair Dying
+Cost			: RM 80.00
+Payment Method		: Cash
+==================================================================
+||                Thank you for choosing Haven Salon!          ||
+==================================================================
+
