@@ -56,7 +56,7 @@ void viewTimeslotAvailable(string username, string currentPassword);
 void feedbackForm(string username, string currentPassword);
 
 bookingType* readBookingsFile(int& lenBookings);
-bool checkBookingAvailable(int day, int timeslot, int expert, int hour);
+bool checkBookingAvailable(int day, int timeslot, int expert);
 void saveBookingToFile(bookingType newBooking);
 
 void makeBooking(string username, string currentPassword);
@@ -504,7 +504,7 @@ bookingType* readBookingsFile(int& lenBookings) {
 }
 
 // Check if booking is available based on day, timeslot, and expert
-bool checkBookingAvailable(int day, int timeslot, int expert, int hour) {
+bool checkBookingAvailable(int day, int timeslot, int expert) {
     if (isWeekend(day)) {
         return false; // Salon is closed on weekends
     }
@@ -520,11 +520,12 @@ bool checkBookingAvailable(int day, int timeslot, int expert, int hour) {
     for (int i = 0; i < lenBookings; i++) {
         // Check if the booking is for the same day and expert
         if (bookingsArray[i].day == day && bookingsArray[i].expert == expert) {
+            cout << bookingsArray[i].timeslot;
 
             // Check the duration of the service, (1 or 2 hour)
-            if (hour == 2) {
+            if (DURATION[bookingsArray[i].service] == 2) {
                 // If 2 hours, check the second hour
-                if (bookingsArray[i].timeslot == (timeslot + 1)) {
+                if (bookingsArray[i].timeslot == (timeslot - 1)) {
                     return false;
                 }
             }
@@ -902,7 +903,7 @@ void printSchedule() {
             }
             cout << setw(18) << left << EXPERT[exp];
             for (int tms = 0; tms < 6; tms++) {
-                if (checkBookingAvailable(date, tms, exp, 1)) {
+                if (checkBookingAvailable(date, tms, exp)) {
                     cout << GREEN << setw(18) << "A" << RESET;
                 }
                 else {
@@ -1155,7 +1156,7 @@ int autoAssignExpert(int day, int timeslot, int hour) {
 
     // Check availability of each expert
     for (int i = 0; i < experts.size(); i++) {
-        if (checkBookingAvailable(day, timeslot, i, hour)) {
+        if (checkBookingAvailable(day, timeslot, i)) {
             availableExperts[countAvailable] = i;  // Add available expert's index
             countAvailable++;  // Increment the counter
         }
@@ -1218,7 +1219,7 @@ void makeBooking(string username, string currentPassword) {
     paymentMode = selectPaymentMode();
 
     // Step 6: Check availability and finalize booking
-    bool available = checkBookingAvailable(day, timeSlot, expert, DURATION[service]);
+    bool available = checkBookingAvailable(day, timeSlot, expert);
 
     if (available) {
         // Create a new booking
