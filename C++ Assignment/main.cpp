@@ -1514,7 +1514,7 @@ void viewFeedbackForm(string username) {
 void adminLogout(string username) {
     char confirmLogout = 'Y';
     cout << "\n\t\tDo you wish to log out? (Y/N):\t";
-    cin >> confirmLogout;
+    //cin >> confirmLogout;
     cin >> confirmLogout;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     if (toupper(confirmLogout) == 'Y') {
