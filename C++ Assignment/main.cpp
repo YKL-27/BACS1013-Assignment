@@ -92,11 +92,11 @@ const string PAYMENTMODE[3] = { "Credit Card", "Debit Card", "Cash" };
 const double COST[4] = { 25.00, 15.00, 80.00, 15.00 };
 const string MONTH = "10/2024";
 const int MAX_DAYS = 31; // Supports up to 31 days
-const int MONDAY = 0;   // 29 Sep is Monday, 1 day before 1 Oct, hence 1-1=0
+const int FIRST_MONDAY = -1;   // 29 Sep is Monday, 1 day before 1 Oct, hence 1-1=0
 
 // Helper Functions
 int getDayOfWeek(int day) {
-    return ((day - MONDAY) % 7) + 1;
+    return ((day - FIRST_MONDAY - 1) % 7) + 1;
 }
 
 
@@ -1044,8 +1044,8 @@ void printCalendar() {
     CENTER << "MON TUE WED THU FRI SAT SUN\n";
 
     // Assuming each week starts from a specific day (e.g., Monday = 1)
-    int startDay = MONDAY;  // 0-based for Monday
     int currentDay = 1;
+    int startDay = getDayOfWeek(currentDay) - 1;
 
     // Add padding for the start day
     CENTER;
