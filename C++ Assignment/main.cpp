@@ -1117,7 +1117,12 @@ int selectTimeSlot(int service) {
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    return choice - 1;
+    if (service == 3) { // Consultation service
+        return choice - 1;
+    }
+    else {
+        return (choice - 1) * 2;
+    }
 }
 
 // Customer > Make Booking > Select Expert

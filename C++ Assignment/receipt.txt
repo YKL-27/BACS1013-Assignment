@@ -55,3 +55,17 @@ Payment Method		: Cash
 ||                Thank you for choosing Haven Salon!          ||
 ==================================================================
 
+==================================================================
+||                    Haven Salon - Receipt                     ||
+==================================================================
+Customer Name		: ykliang
+Date			: 2/10/2024
+Time			: 4:00PM - 6:00PM
+Expert			: Bernice Lim
+Service			: Hair Wash
+Cost			: RM 15.00
+Payment Method		: Debit Card
+==================================================================
+||                Thank you for choosing Haven Salon!          ||
+==================================================================
+
