@@ -210,7 +210,7 @@ void mainMenu() {
         exit(0);
         break;
     default:
-        cout << RED << "\t\tInvalid option, Please try again!\n" << RESET;
+        CENTER << RED << "Invalid option, Please try again!\n" << RESET;
         pauseEnter();
         mainMenu(); // Return to main menu for a retry
     }
@@ -631,7 +631,7 @@ void customerPage(string username, string currentPassword) {
         customerLogout(username, currentPassword);
         break;
     default:
-        cout << RED << "\t\tnvalid option, Please try again!\n" << RESET;
+        CENTER << RED << "Invalid option, Please try again!\n" << RESET;
         pauseEnter();
         customerPage(username, currentPassword); // Return to customer page for a retry
     }
@@ -725,7 +725,7 @@ void mybookingsDetail(string username, string currentPassword) {
             customerPage(username, currentPassword);
             return;
         default:
-            cout << RED << "\t\tInvalid option, Please try again!\n" << RESET;
+            CENTER << RED << "Invalid option, Please try again!\n" << RESET;
             pauseEnter();
         }
     }
@@ -781,7 +781,7 @@ void cancelBooking(string username, string currentPassword, bookingType* booking
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (bookingToCancel <= 0 || bookingToCancel > bookingCount) {
-        cout << RED << "\t\tInvalid selection. Returning to My Bookings page.\n" << RESET;
+        CENTER << RED << "Invalid selection. Returning to My Bookings page.\n" << RESET;
         pauseEnter();
         return;
     }
@@ -827,7 +827,7 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (bookingToView == 0 || bookingToView > bookingCount) {
-        cout << RED << "\t\tInvalid selection. Returning to bookings page.\n" << RESET;
+        CENTER << RED << "Invalid selection. Returning to bookings page.\n" << RESET;
         pauseEnter();
         return;
     }
@@ -986,7 +986,7 @@ int getChoice(const array<string, N>& options) {
     }
     CENTER << "Enter your choice: ";
     while (!(cin >> choice) || choice < 1 || choice > options.size()) {
-        cout << RED << "\t\tInvalid choice. Please enter a number between 1 and " << options.size() << ": " << RESET;
+        CENTER << RED << "Invalid choice. Please enter a number between 1 and " << options.size() << ": " << RESET;
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
@@ -1089,7 +1089,7 @@ int selectDate() {
         }
 
         if (day < 1 || day > MAX_DAYS) {
-            cout << RED << "\t\tInvalid input! The date should be between 1 and " << MAX_DAYS << ". Please try again.\n"<< RESET;
+            CENTER << RED << "Invalid input! The date should be between 1 and " << MAX_DAYS << ". Please try again.\n"<< RESET;
         }
     } while (day < 1 || day > MAX_DAYS);  // Repeat until the user enters a valid day
 
@@ -1123,7 +1123,7 @@ int selectTimeSlot(int service) {
     int choice;
     CENTER << "Enter your choice: ";
     while (!(cin >> choice) || choice < 1 || choice > availableSlots) {
-        cout << RED << "\t\tInvalid choice. Please enter a number between 1 and " << availableSlots << ": " << RESET;
+        CENTER << RED << "Invalid choice. Please enter a number between 1 and " << availableSlots << ": " << RESET;
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
@@ -1390,7 +1390,7 @@ void adminPage(string username) {
         break;
     default:
         cout << endl;
-        cout << RED << "\t\tInvalid option, Please try again!\n" << RESET;
+        CENTER << RED << "Invalid option, Please try again!\n" << RESET;
         pauseEnter();
         adminPage(username); // Return to admin page for a retry
     }
