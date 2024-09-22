@@ -520,7 +520,6 @@ bool checkBookingAvailable(int day, int timeslot, int expert) {
     for (int i = 0; i < lenBookings; i++) {
         // Check if the booking is for the same day and expert
         if (bookingsArray[i].day == day && bookingsArray[i].expert == expert) {
-            cout << bookingsArray[i].timeslot;
 
             // Check the duration of the service, (1 or 2 hour)
             if (DURATION[bookingsArray[i].service] == 2) {
