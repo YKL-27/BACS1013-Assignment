@@ -23,6 +23,7 @@
     <None Include="bookings.dat" />
     <None Include="users.dat" />
     <None Include="services.dat" />
+    <None Include="feedback.dat" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="receipt.txt" />

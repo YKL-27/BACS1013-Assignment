@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bookings.dat" />
+    <None Include="feedback.dat" />
     <None Include="services.dat" />
     <None Include="users.dat" />
   </ItemGroup>

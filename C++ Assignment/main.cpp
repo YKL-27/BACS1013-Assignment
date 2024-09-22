@@ -1243,7 +1243,7 @@ void displayBookingSummary(const bookingType& booking) {
     cout << CYAN << "\n\t\t-----------------------------------------BOOKING SUMMARY---------------------------------------------------\n\n" << RESET;
     CENTER << setw(15) << left << "Username:" << "\t" << booking.customerName << endl;
     CENTER << setw(15) << left << "Day:" << "\t" << formatDate(booking.day) << endl;
-    CENTER << setw(15) << left << "Time Slot:" << "\t" << (booking.service == 3 ? TIMESLOT_CONSULT[booking.timeslot] : TREATMENT_TIMESLOT[booking.timeslot]) << endl;
+    CENTER << setw(15) << left << "Time Slot:" << "\t" << (booking.service == 3 ? TIMESLOT_CONSULT[booking.timeslot] : TREATMENT_TIMESLOT[booking.timeslot/2]) << endl;
     CENTER << setw(15) << left << "Service:" << "\t" << SERVICE[booking.service] << endl;
     CENTER << setw(15) << left << "Expert:" << "\t" << EXPERT[booking.expert] << endl;
     CENTER << setw(15) << left << "Cost:" << "\tRM " << fixed << setprecision(2) << COST[booking.service] << endl;
