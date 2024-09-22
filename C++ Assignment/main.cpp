@@ -1234,6 +1234,7 @@ void makeBooking(string username, string currentPassword) {
     }
     else {
         cout << RED << "\t\tSorry, the selected slot is not available.\n";
+        pauseEnter();
     }
     customerPage(username, currentPassword);
 }
