@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <array>
-//#include <conio.h>
+#include <conio.h>
 #define RESET   "\033[0m"
 #define RED     "\033[31m"      /* Red */
 #define GREEN   "\033[32m"      /* Green */
@@ -15,7 +15,7 @@
 #define BLUE    "\033[34m"      /* Blue */
 #define MAGENTA "\033[35m"      /* Magenta */
 #define CYAN    "\033[36m"      /* Cyan */
-#define WHITE   "\033[37m"      /* White */
+#define CENTER cout << "\t\t\t\t\t\t\t"
 
 using namespace std;
 
@@ -28,12 +28,12 @@ struct userType {
 
 struct bookingType {
     string customerName;
-    int day = 0;            // Represents the day of the month (1-31)
-    int timeslot = 0;       // Index of TIMESLOT[]
-    int expert = 0;         // Index of EXPERT[]
-    int service = 0;        // Index of SERVICE[]
-    double cost = 0.0;      // Cost of the service
-    int payment_mode = 0;   // Index of PAYMENTMODE[]
+    int day = 0;  // Represents the day of the month
+    int timeslot = 0; // Index of TIMESLOT[]
+    int expert = 0; // Index of EXPERT[]
+    int service = 0; // Index of SERVICE[]
+    double cost = 0.0; // Cost of the service
+    int payment_mode = 0; // Index of PAYMENTMODE[]
 };
 
 // FUNCTION PROTOTYPES------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -62,14 +62,15 @@ void saveBookingToFile(bookingType newBooking);
 void makeBooking(string username, string currentPassword);
 int selectService();
 int selectExpert(int day, int timeslot, int service);
+void printCalendar();
 int selectDate();
 int selectTimeSlot(int service);
 int selectPaymentMode();
 int autoAssignExpert(int day, int timeslot, int hour);
 void generateReceipt(const bookingType& booking);
+void displayBookingSummary(const bookingType& booking);
 
 void printSchedule();
-
 void adminLogin();
 void adminPage(string username);
 void adminLogout(string username);
@@ -78,28 +79,26 @@ void viewSalesRecord(string username);
 void viewBookingSlot(string username);
 void viewFeedbackForm(string username);
 
-// GLOBAL CONSTANTS------------------------------------------------------------------------------------------------------------------------------------------------------
+// GLOBAL CONSTANT------------------------------------------------------------------------------------------------------------------------------------------------------
 const string FILE_USERS = "users.dat";
 const string FILE_BOOKINGS = "bookings.dat";
-
 const string TREATMENT_TIMESLOT[3] = { "10:00AM - 12:00PM", "2:00PM - 4:00PM","4:00PM - 6:00PM" };
 const string TIMESLOT_CONSULT[6] = { "10:00AM - 11:00AM", "11:00AM - 12:00PM", "2:00PM - 3:00PM", "3:00PM - 4:00PM" , "4:00PM - 5:00PM", "5:00PM - 6:00PM" };
 const string HOURS[9] = { "10:00AM", "11:00AM", "12:00PM", " 1:00PM", " 2:00PM", " 3:00PM", " 4:00PM", " 5:00PM", " 6:00PM", };
-
 const string EXPERT[3] = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
 const string SERVICE[4] = { "Hair Cut", "Hair Wash", "Hair Dying", "Styling Consultation" };
 const int DURATION[4] = { 2,2,2,1 };
 const string PAYMENTMODE[3] = { "Credit Card", "Debit Card", "Cash" };
 const double COST[4] = { 25.00, 15.00, 80.00, 15.00 };
-
 const string MONTH = "10/2024";
 const int MAX_DAYS = 31; // Supports up to 31 days
-const int MONDAY = 0;  // 29 Sep is Monday, 1 day before 1 Oct, hence 1-1=0
+const int MONDAY = 0;   // 29 Sep is Monday, 1 day before 1 Oct, hence 1-1=0
 
 // Helper Functions
 int getDayOfWeek(int day) {
     return ((day - MONDAY) % 7) + 1;
 }
+
 
 // Checks if a given day is a weekend (Saturday or Sunday)
 bool isWeekend(int day) {
@@ -123,6 +122,30 @@ string getDayName(int day) {
     }
 }
 
+string getPasswordInput() {
+    string password;
+    char ch;
+
+    while (true) {
+        ch = _getch();
+        if (ch == 13) {
+            break;
+        }
+        else if (ch == 8) {
+            if (!password.empty()) {
+                cout << "\b \b";
+                password.pop_back();
+            }
+        }
+        else {
+            password += ch;
+            cout << '*';
+        }
+    }
+    cout << endl;
+    return password;
+}
+
 // COMMON FUNCTIONS
 // Create a new page by clearing the screen and displaying a logo on top
 void newPageLogo() {
@@ -132,18 +155,14 @@ void newPageLogo() {
 #else
     system("clear");
 #endif
-
-    // Start with the desired color
-    cout << GREEN; // You can choose any color you like
-
     cout << "\t\t  =======================================================================================================\n";
-    cout << "\t\t  || ##     ##    ###    ##     ## ######## ##    ##     ######     ###    ##        #######  ##    ## ||\n";
-    cout << "\t\t  || ##     ##   ## ##   ##     ## ##       ###   ##    ##    ##   ## ##   ##       ##     ## ###   ## ||\n";
-    cout << "\t\t  || ##     ##  ##   ##  ##     ## ##       ####  ##    ##        ##   ##  ##       ##     ## ####  ## ||\n";
-    cout << "\t\t  || ######### ##     ## ##     ## ######   ## ## ##     ######  ##     ## ##       ##     ## ## ## ## ||\n";
-    cout << "\t\t  || ##     ## #########  ##   ##  ##       ##  ####          ## ######### ##       ##     ## ##  #### ||\n";
-    cout << "\t\t  || ##     ## ##     ##   ## ##   ##       ##   ###    ##    ## ##     ## ##       ##     ## ##   ### ||\n";
-    cout << "\t\t  || ##     ## ##     ##    ###    ######## ##    ##     ######  ##     ## ########  #######  ##    ## ||\n";
+    cout << "\t\t  ||" << YELLOW << "##     ##    ###   " << RESET << BLUE << " ##     ##  #######  ##    ## " << RESET << RED  "    ######     ###    " << RESET << GREEN"##        #######  ##    ## " << RESET "||\n";
+    cout << "\t\t  ||" << YELLOW << "##     ##   ## ##  " << RESET << BLUE << " ##     ##  ##       ###   ## " << RESET << RED  "   ##    ##   ## ##   " << RESET << GREEN"##       ##     ## ###   ## " << RESET "||\n";
+    cout << "\t\t  ||" << YELLOW << "##     ##  ##   ## " << RESET << BLUE << " ##     ##  ##       ####  ## " << RESET << RED  "   ##        ##   ##  " << RESET << GREEN"##       ##     ## ####  ## " << RESET "||\n";
+    cout << "\t\t  ||" << YELLOW << "######### ##     ##" << RESET << BLUE << " ##     ##  ######   ## ## ## " << RESET << RED  "    ######  ##     ## " << RESET << GREEN"##       ##     ## ## ## ## " << RESET "||\n";
+    cout << "\t\t  ||" << YELLOW << "##     ## #########" << RESET << BLUE << "  ##   ##   ##       ##  #### " << RESET << RED  "         ## ######### " << RESET << GREEN"##       ##     ## ##  #### " << RESET "||\n";
+    cout << "\t\t  ||" << YELLOW << "##     ## ##     ##" << RESET << BLUE << "   ## ##    ##       ##   ### " << RESET << RED  "   ##    ## ##     ## " << RESET << GREEN"##       ##     ## ##   ### " << RESET "||\n";
+    cout << "\t\t  ||" << YELLOW << "##     ## ##     ##" << RESET << BLUE << "    ###     #######  ##    ## " << RESET << RED  "    ######  ##     ## " << RESET << GREEN"########  #######  ##    ## " << RESET "||\n";
     cout << "\t\t  =======================================================================================================\n\n";
 
     // Reset to default color
@@ -152,7 +171,7 @@ void newPageLogo() {
 
 // Pause by prompting an input (use string & getline in case user typed in anything)
 void pauseEnter() {
-    cout << YELLOW << "Press Enter to continue..." << RESET;
+    cout << YELLOW << "\t\tPress Enter to continue..." << RESET;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
@@ -161,17 +180,16 @@ void mainMenu() {
     // First Interface
     char option;
     newPageLogo();
-    cout << CYAN << "----------------------------------------MAIN MENU---------------------------------------------------" << RESET << endl;
-    cout << "WELCOME TO HAVEN SALON\n";
-    cout << "Please choose your option.\n\n";
+    cout << CYAN << "\t\t-------------------------------------------------MAIN MENU------------------------------------------------\n\n" << RESET << endl;
+    CENTER << "WELCOME TO HAVEN SALON\n";
+    CENTER << "Please choose your option.\n\n";
     // Main Menu options
-    cout << "A\t: About Us\n";
-    cout << "B\t: Customer Register\n";
-    cout << "C\t: Cutomer Login\n";
-    cout << "D\t: Admin Login\n";
-    cout << "E\t: Exit\n\n";
-
-    cout << "Enter your choice:\t";
+    CENTER << "A\t: About Us\n";
+    CENTER << "B\t: Customer Registration\n";
+    CENTER << "C\t: Customer Login\n";
+    CENTER << "D\t: Admin Login\n";
+    CENTER << "E\t: Exit\n\n";
+    CENTER << "Enter your choice:\t";
     cin >> option;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');   // Ignore all characters up to the newline
 
@@ -192,7 +210,7 @@ void mainMenu() {
         exit(0);
         break;
     default:
-        cout << "\nInvalid option, Please try again!\n";
+        cout << RED << "\n\t\tInvalid option, Please try again!\n" << RESET;
         pauseEnter();
         mainMenu(); // Return to main menu for a retry
     }
@@ -201,14 +219,12 @@ void mainMenu() {
 // ABOUT US PAGE
 void aboutUsPage() {
     newPageLogo();
-
-    // Print the header in magenta
-    cout << MAGENTA << "---------------------------------------------------------ABOUT US----------------------------------------------------------------\n" << RESET;
+    cout << CYAN << "\t\t-------------------------------------------------ABOUT US-------------------------------------------------\n" << RESET;
 
     ifstream aboutUsFile("aboutUs.txt");
 
     if (!aboutUsFile) {
-        cerr << RED << "Error: Could not open aboutUs.txt" << endl;
+        cout << RED << "\t\tError: Could not open aboutUs.txt" << endl;
         pauseEnter();
         mainMenu();
     }
@@ -217,12 +233,13 @@ void aboutUsPage() {
     string line;
     cout << MAGENTA;
     while (getline(aboutUsFile, line)) {
-        cout << line << endl;
+        cout << "\t\t" << line << endl;
     }
     cout << RESET;
 
     // Close the file
     aboutUsFile.close();
+    cout << "\n";
     pauseEnter();
     mainMenu();
 }
@@ -234,7 +251,7 @@ bool checkUsernameAvailable(string username) {
 
     ifstream infile(FILE_USERS);
     if (!infile) {
-        cout << RED << "\n\nUnable to access user data currently.\n";
+        cout << RED << "\t\t\n\nUnable to access user data currently.\n";
         pauseEnter();
         mainMenu();
     }
@@ -293,7 +310,7 @@ void addNewUserToFile(userType new_user) {
     ofstream outFile(FILE_USERS, ios::app); // Open file in append mode
 
     if (!outFile) {
-        cout << RED << "Sorry, an error occurred while opening the file.";
+        cout << RED << "\t\tSorry, an error occurred while opening the file.";
         return;
     }
 
@@ -310,13 +327,13 @@ void customerRegistration() {
     do {
         newPageLogo();
         string inputUsername = "", inputPassword = "", inputPassword2;
-        cout << "==========REGISTER PAGE==========\n\n";
-        cout << "Enter a new username:\t\t";
+        cout << CYAN << "\t\t------------------------------------------CUSTOMER REGISTRATION------------------------------------------\n\n" << RESET;
+        cout << "\t\t\tEnter a new username:\t";
         getline(cin, inputUsername);
-        cout << "\nEnter a new password:\t\t";
-        getline(cin, inputPassword);
-        cout << "\nEnter the new password again:\t";
-        getline(cin, inputPassword2);
+        cout << "\n\t\t\tEnter a new password:\t";
+        inputPassword = getPasswordInput();
+        cout << "\n\t\t\tEnter the new password again:\t";
+        inputPassword2 = getPasswordInput();
 
         if (checkUsernameAvailable(inputUsername)) {
             if (isValidUsername(inputUsername)) {
@@ -324,14 +341,14 @@ void customerRegistration() {
                     if (inputPassword == inputPassword2) {
                         userType new_user = { inputUsername, inputPassword };
                         addNewUserToFile(new_user);
-                        cout << "\n\nRegistered successfully\n";
+                        cout << GREEN << "\n\n\t\tRegistered successfully\n";
                         pauseEnter();
                         customerPage(inputUsername, inputPassword);
                         return;
                     }
                     else {
                         char option;
-                        cout << "\n\nBoth passwords do not match\nDo you wish to continue? (Y/N):\t";
+                        cout << RED << "\n\n\t\tBoth passwords do not match\n" << RESET << "\t\tDo you wish to continue? (Y/N):\t";
                         cin >> option;
                         cin.ignore(numeric_limits<streamsize>::max(), '\n');
                         loop = (toupper(option) == 'Y');
@@ -339,7 +356,7 @@ void customerRegistration() {
                 }
                 else {
                     char option;
-                    cout << "\n\nPassword length must be between 8 and 16 characters\nDo you wish to continue? (Y/N):\t";
+                    cout << RED << "\n\n\t\tPassword length must be between 8 and 16 characters\n" << RESET << "\t\tDo you wish to continue? (Y/N):\t";
                     cin >> option;
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     loop = (toupper(option) == 'Y');
@@ -347,7 +364,7 @@ void customerRegistration() {
             }
             else {
                 char option;
-                cout << "\n\nUsername must be between 5 and 20 characters and can only contain letters and numbers\nDo you wish to continue? (Y/N):\t";
+                cout << RED << "\n\n\t\tUsername must be between 5 and 20 characters and can only contain letters and numbers\n" << RESET << "\t\tDo you wish to continue ? (Y / N) : \t";
                 cin >> option;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 loop = (toupper(option) == 'Y');
@@ -355,7 +372,7 @@ void customerRegistration() {
         }
         else {
             char option;
-            cout << "\n\nUsername taken\nDo you wish to continue? (Y/N):\t";
+            cout << RED << "\n\n\t\tUsername taken\n\t\t" << RESET << "Do you wish to continue ? (Y / N) : \t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y');
@@ -372,7 +389,7 @@ void customerLogin() {
 
     ifstream infile(FILE_USERS);
     if (!infile) {
-        cout << RED << "\n\nUnable to login currently due to system error\n";
+        cout << RED << "\n\n\t\tUnable to login currently due to system error\n";
         pauseEnter();
         mainMenu();
     }
@@ -402,11 +419,11 @@ void customerLogin() {
     do {
         newPageLogo();
         string inputUsername = "", inputPassword = "";
-        cout << "----------CUSTOMER LOGIN----------\n\n";
-        cout << "Enter your username:\t";
+        cout << CYAN << "\t\t---------------------------------------------CUSTOMER LOGIN----------------------------------------------\n\n" << RESET;
+        cout << "\t\t\tEnter your username:\t";
         getline(cin, inputUsername);
-        cout << "\nEnter your password:\t";
-        getline(cin, inputPassword);
+        cout << "\n\t\t\tEnter your password:\t";
+        inputPassword = getPasswordInput();
 
         // Check if username and password are in the record
         for (int i = 0; i < counter; i++) {
@@ -417,14 +434,14 @@ void customerLogin() {
             }
         }
         if (recordFound) {
-            cout << GREEN << "\n\nAccess granted\n";
+            cout << GREEN << "\n\n\t\tAccess granted\n";
             pauseEnter();
             customerPage(inputUsername, currentPassword); // Pass username and password to the customer page
             return;
         }
         else {
             char option;
-            cout << RED << "\n\nAccess denied\n" << RESET << "Do you wish to retry ? (Y / N) : \t";
+            cout << RED << "\n\n\t\tAccess denied\n" << RESET << "\t\tDo you wish to retry ? (Y / N) : \t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -440,7 +457,7 @@ bookingType* readBookingsFile(int& lenBookings) {
 
     ifstream infile(FILE_BOOKINGS);
     if (!infile) {
-        cout << RED << "\n\nUnable to access booking data currently.\n";
+        cout << RED << "\n\n\t\tUnable to access booking data currently.\n";
         pauseEnter();
         lenBookings = 0; // Set length to 0 if there's an error
         return nullptr;  // Return nullptr to indicate an error
@@ -507,7 +524,7 @@ bool checkBookingAvailable(int day, int timeslot, int expert, int hour) {
             // Check the duration of the service, (1 or 2 hour)
             if (hour == 2) {
                 // If 2 hours, check the second hour
-                if (bookingsArray[i].timeslot == (timeslot+1)) {
+                if (bookingsArray[i].timeslot == (timeslot + 1)) {
                     return false;
                 }
             }
@@ -516,6 +533,7 @@ bool checkBookingAvailable(int day, int timeslot, int expert, int hour) {
             if ((bookingsArray[i].timeslot) == timeslot) {
                 return false;
             }
+
         }
     }
     return true;  // No conflict found, the slot is available
@@ -527,7 +545,7 @@ void saveBookingToFile(bookingType newBooking) {
     ofstream outFile(FILE_BOOKINGS, ios::app);
 
     if (!outFile) {
-        cout << RED << "Sorry, an error occurred while saving the booking.";
+        cout << RED << "\t\tSorry, an error occurred while saving the booking.";
         return;
     }
 
@@ -548,18 +566,18 @@ void customerPage(string username, string currentPassword) {
     char option;
     char option2;
     newPageLogo();
-    cout << "--------CUSTOMER HOMEPAGE--------\n";
-    cout << "Welcome " << username << endl;
-    cout << "Please choose your option.\n";
+    cout << CYAN << "\t\t--------------------------------------------CUSTOMER HOMEPAGE--------------------------------------------\n\n" << RESET;
+    CENTER << "Welcome " << username << endl;
+    CENTER << "Please choose your option.\n";
 
-    cout << "A\t: View Service and Expert\n";
-    cout << "B\t: View Available Time Slots\n";
-    cout << "C\t: Make Booking\n";
-    cout << "D\t: My Bookings\n";
-    cout << "E\t: Feedback Form\n";
-    cout << "F\t: Log Out and Return to Main Menu\n\n";
+    CENTER << "A\t: View Service and Expert\n";
+    CENTER << "B\t: View Available Time Slots\n";
+    CENTER << "C\t: Make Booking\n";
+    CENTER << "D\t: My Bookings\n";
+    CENTER << "E\t: Feedback Form\n";
+    CENTER << "F\t: Log Out and Return to Main Menu\n\n";
 
-    cout << "Enter your choice:\t";
+    CENTER << "Enter your choice:\t";
     cin >> option;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -568,24 +586,23 @@ void customerPage(string username, string currentPassword) {
         newPageLogo();
 
         // Display Services 
-        cout << "--------OUR SERVICES--------\n";
-        cout << setw(30) << left << "Service" << setw(10) << "Price (RM)\n";
-        cout << "------------------------------------------\n";
+        cout << CYAN << "\t\t-----------------------------------------------OUR SERVICES----------------------------------------------\n\n" << RESET;
+        CENTER << setw(30) << left << "Service" << setw(10) << "Price (RM)\n";
+        cout << "\t\t----------------------------------------------------------------------------------------------------------\n";
         for (int i = 0; i < 4; i++) {
-            cout << setw(30) << left << SERVICE[i]
+            CENTER << setw(30) << left << SERVICE[i]
                 << setw(10) << right << fixed << setprecision(2) << COST[i] << endl;
         }
-        cout << "------------------------------------------\n";
+        cout << "\t\t----------------------------------------------------------------------------------------------------------\n\n";
 
         // Display Experts 
-        cout << "\n--------OUR EXPERTS--------\n";
-        cout << setw(10) << left << "Expert Name\n";
-        cout << "---------------------------\n";
+        cout << CYAN << "\t\t-----------------------------------------------OUR EXPERTS-----------------------------------------------\n\n" << RESET;
+        CENTER << setw(10) << left << "Expert Name\n";
+        cout << "\t\t----------------------------------------------------------------------------------------------------------\n";
         for (int i = 0; i < 3; i++) {
-            cout << setw(20) << left << EXPERT[i] << endl;
+            CENTER << setw(20) << left << EXPERT[i] << endl;
         }
-        cout << "---------------------------\n";
-
+        cout << "\t\t----------------------------------------------------------------------------------------------------------\n";
         pauseEnter();
         customerPage(username, currentPassword);
         break;
@@ -600,7 +617,7 @@ void customerPage(string username, string currentPassword) {
         mybookingsDetail(username, currentPassword);
         break;
     case 'E': case 'e':
-        cout << "\nDo you wish to write down your feedback? (Y/N):\t";
+        cout << "\n\t\tDo you wish to write down your feedback? (Y/N):\t";
         cin >> option2;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         if (toupper(option2) == 'Y') {
@@ -614,21 +631,22 @@ void customerPage(string username, string currentPassword) {
         customerLogout(username, currentPassword);
         break;
     default:
-        cout << "\nInvalid option, Please try again!\n";
+        cout << RED << "\n\t\tInvalid option, Please try again!\n";
         pauseEnter();
         customerPage(username, currentPassword); // Return to customer page for a retry
     }
 }
-
 // Helper Function to Format Date
 string formatDate(int day) {
     return to_string(day) + "/" + MONTH; // Formats as "dd-mm-yyyy"
 }
 
+
 // Helper Function to Get Full Date with Day Name
 string getFullDate(int day) {
-    return getDayName(day) + ", " + formatDate(day);
+    return getDayName(day) + ", " + formatDate(day); // e.g., "Monday, 1-10-2024"
 }
+
 
 // Customer > My Bookings (Display all bookings made by the current user)
 void mybookingsDetail(string username, string currentPassword) {
@@ -637,7 +655,7 @@ void mybookingsDetail(string username, string currentPassword) {
     bookingType* bookingsArray = readBookingsFile(lenBookings);
 
     if (bookingsArray == nullptr || lenBookings == 0) {
-        cout << RED << "No bookings available or file error.\n";
+        cout << RED << "\t\tNo bookings available or file error.\n";
         pauseEnter();
         customerPage(username, currentPassword);
         return;
@@ -645,16 +663,16 @@ void mybookingsDetail(string username, string currentPassword) {
 
     while (true) {
         newPageLogo();
-        cout << "\t\t\tMy Bookings\n";
-        cout << "========================================================================================================================\n";
-        cout << setw(4) << left << "No"
-            << setw(15) << left << "Day" // Adjusted Width
+        CENTER << CYAN << "\tMy Bookings\n" << RESET;
+        cout << "\t========================================================================================================================\n";
+        cout << "\t" << setw(4) << left << "No"
+            << setw(15) << left << "Date" // Adjusted Width
             << setw(25) << left << "Time Slot"
             << setw(20) << left << "Expert"
             << setw(20) << left << "Service"
             << setw(10) << left << "Cost(RM)"
             << setw(15) << left << "Payment Mode" << endl;
-        cout << "========================================================================================================================\n";
+        cout << "\t========================================================================================================================\n";
 
         int bookingCount = 0;
         bookingType userBookings[100];
@@ -664,7 +682,7 @@ void mybookingsDetail(string username, string currentPassword) {
             if (bookingsArray[i].customerName == username) {
                 userBookings[bookingCount] = bookingsArray[i];
                 bookingIndices[bookingCount] = i;
-                cout << setw(4) << left << bookingCount + 1
+                cout << "\t" << setw(4) << left << bookingCount + 1
                     << setw(15) << left << formatDate(bookingsArray[i].day) // Updated Line
 
                     << setw(25) << left
@@ -680,19 +698,19 @@ void mybookingsDetail(string username, string currentPassword) {
         }
 
         if (bookingCount == 0) {
-            cout << "You have no bookings.\n";
-            cout << "========================================================================================================================\n";
+            cout << RED << "\t\tYou have no bookings.\n" << RESET;
+            cout << "\t========================================================================================================================\n";
             pauseEnter();
             customerPage(username, currentPassword);
             return;
         }
 
-        cout << "========================================================================================================================\n\n";
-        cout << "Please choose your option\n";
-        cout << "A\t: Cancel Booking\n";
-        cout << "B\t: View Receipt\n";  // Add an option to view the receipt
-        cout << "C\t: Return to Customer Page\n\n";
-        cout << "Enter your choice: ";
+        cout << "\t========================================================================================================================\n\n";
+        CENTER << "Please choose your option\n";
+        CENTER << "A\t: Cancel Booking\n";
+        CENTER << "B\t: View Receipt\n";  // Add an option to view the receipt
+        CENTER << "C\t: Return to Customer Page\n\n";
+        CENTER << "Enter your choice: ";
         cin >> option;
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -707,31 +725,40 @@ void mybookingsDetail(string username, string currentPassword) {
             customerPage(username, currentPassword);
             return;
         default:
-            cout << "\nInvalid option, Please try again!\n";
+            cout << RED << "\n\t\tInvalid option, Please try again!\n";
             pauseEnter();
         }
     }
 }
 
+
 void cancelBooking(string username, string currentPassword, bookingType* bookingsArray, int lenBookings, int* bookingIndices, int bookingCount) {
     // Authentication with password same as login password
     string inputPassword;
-    cout << "Please enter your password again to confirm: ";
-    getline(cin, inputPassword);
+    cout << "\t\tPlease enter your password again to confirm: ";
+    inputPassword = getPasswordInput();
 
     if (inputPassword != currentPassword) {
-        cout << "Authentication failed. Incorrect password.\n";
-
+        cout << RED << "\t\tAuthentication failed. Incorrect password.\n" << RESET;
         pauseEnter();
         return;
     }
 
     // Display user's booking details
-    cout << "\nAvailable bookings for cancellation:\n";
+    CENTER << CYAN << "\n\t\tAvailable bookings for cancellation\n" << RESET;
+    cout << "\t\t==========================================================================================================\n";
+    cout << "\t\t" << setw(4) << left << "No"
+        << setw(15) << left << "Date" // Adjusted Width
+        << setw(25) << left << "Time Slot"
+        << setw(20) << left << "Expert"
+        << setw(20) << left << "Service"
+        << setw(10) << left << "Cost(RM)"
+        << setw(15) << left << "Payment Mode" << endl;
+    cout << "\t\t==========================================================================================================\n";
     for (int i = 0; i < bookingCount; i++) {
         int idx = bookingIndices[i];
-        cout << setw(4) << left << i + 1
-            << setw(25) << left << getFullDate(bookingsArray[idx].day)
+        cout << "\t\t" << setw(4) << left << i + 1
+            << setw(15) << left << formatDate(bookingsArray[i].day)
             << setw(25) << left
             << (bookingsArray[idx].service == 3 ? TIMESLOT_CONSULT[bookingsArray[idx].timeslot] : TREATMENT_TIMESLOT[bookingsArray[idx].timeslot])
             << setw(20) << left << EXPERT[bookingsArray[idx].expert]
@@ -741,19 +768,20 @@ void cancelBooking(string username, string currentPassword, bookingType* booking
     }
 
     if (bookingCount == 0) {
-        cout << "No active bookings to cancel.\n";
+        cout << RED << "\t\tNo active bookings to cancel.\n";
         pauseEnter();
         return;
     }
+    cout << "\t\t==========================================================================================================\n\n";
 
     // Ask customer to cancel booking
     int bookingToCancel = 0;
-    cout << "Enter the number of the booking you want to cancel: ";
+    cout << "\t\tEnter the number of the booking you want to cancel: ";
     cin >> bookingToCancel;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (bookingToCancel <= 0 || bookingToCancel > bookingCount) {
-        cout << "Invalid selection. Returning to My Bookings page.";
+        cout << RED << "\t\tInvalid selection. Returning to My Bookings page.\n";
         pauseEnter();
         return;
     }
@@ -764,7 +792,7 @@ void cancelBooking(string username, string currentPassword, bookingType* booking
     // Delete cancelled booking from bookings.dat
     ofstream outFile(FILE_BOOKINGS);
     if (!outFile) {
-        cout << "Error opening file for writing.\n";
+        cout << RED << "\t\tError opening file for writing.\n";
         return;
     }
 
@@ -782,7 +810,7 @@ void cancelBooking(string username, string currentPassword, bookingType* booking
 
     outFile.close();
 
-    cout << "Booking cancelled successfully.\n";
+    cout << GREEN << "\t\tBooking cancelled successfully.\n";
     pauseEnter();
 
     // Return and update My Bookings
@@ -794,12 +822,12 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
     int bookingToView;
 
     // Ask the user to select the booking they want to view the receipt for
-    cout << "\nSelect the booking number to view the receipt (0 to return): ";
+    cout << "\n\t\tSelect the booking number to view the receipt (0 to return): ";
     cin >> bookingToView;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     if (bookingToView == 0 || bookingToView > bookingCount) {
-        cout << "Invalid selection. Returning to bookings page.\n";
+        cout << RED << "\t\tInvalid selection. Returning to bookings page.\n";
         pauseEnter();
         return;
     }
@@ -808,33 +836,36 @@ void viewReceipt(string username, bookingType* bookingsArray, int* bookingIndice
     const bookingType& booking = bookingsArray[selectedBookingIndex];
 
     // Display the receipt details on the console
-    cout << "==================================================================\n";
-    cout << "||                    Haven Salon - Receipt                     ||\n";
-    cout << "==================================================================\n";
-    cout << "Customer Name\t\t: " << booking.customerName << endl;
+    cout << "\t\t\t\t\t==================================================================\n";
+    cout << "\t\t\t\t\t||                    Haven Salon - Receipt                     ||\n";
+    cout << "\t\t\t\t\t==================================================================\n";
+    cout << "\t\t\t\t\tCustomer Name\t\t: " << booking.customerName << endl;
 
     // **Modified Line: Use formatDate to display the date properly**
-    cout << "Date\t\t\t: " << formatDate(booking.day) << endl;
+    cout << "\t\t\t\t\tDate\t\t\t: " << formatDate(booking.day) << endl;
 
     // Check if the service is a consultation and adjust the time slot accordingly
     if (booking.service == 3) {  // Consultation (1-hour slots)
-        cout << "Time\t\t\t: " << TIMESLOT_CONSULT[booking.timeslot] << endl;
+        cout << "\t\t\t\t\tTime\t\t\t: " << TIMESLOT_CONSULT[booking.timeslot] << endl;
     }
     else {  // Other services (2-hour slots)
-        cout << "Time\t\t\t: " << TREATMENT_TIMESLOT[booking.timeslot] << endl;
+        cout << "\t\t\t\t\tTime\t\t\t: " << TREATMENT_TIMESLOT[booking.timeslot] << endl;
     }
 
-    cout << "Expert\t\t\t: " << EXPERT[booking.expert] << endl;
-    cout << "Service\t\t\t: " << SERVICE[booking.service] << endl;
-    cout << "Cost\t\t\t: RM " << fixed << setprecision(2) << COST[booking.service] << endl;
-    cout << "Payment Method\t\t: " << PAYMENTMODE[booking.payment_mode] << endl;
-    cout << "==================================================================\n";
-    cout << "||                Thank you for choosing Haven Salon!          ||\n";
-    cout << "==================================================================\n\n";
+    cout << "\t\t\t\t\tExpert\t\t\t: " << EXPERT[booking.expert] << endl;
+    cout << "\t\t\t\t\tService\t\t\t: " << SERVICE[booking.service] << endl;
+    cout << "\t\t\t\t\tCost\t\t\t: RM " << fixed << setprecision(2) << COST[booking.service] << endl;
+    cout << "\t\t\t\t\tPayment Method\t\t: " << PAYMENTMODE[booking.payment_mode] << endl;
+    cout << "\t\t\t\t\t==================================================================\n";
+    cout << "\t\t\t\t\t||                Thank you for choosing Haven Salon!          ||\n";
+    cout << "\t\t\t\t\t==================================================================\n\n";
 
     // Pause after viewing the receipt
     pauseEnter();
 }
+
+
+
 
 // Customer > View Time Slot Available (Display available time slots for all experts)
 void viewTimeslotAvailable(string username, string currentPassword) {
@@ -844,7 +875,7 @@ void viewTimeslotAvailable(string username, string currentPassword) {
 
 void printSchedule() {
     newPageLogo();
-    cout << "\t\t\t\t\t\t\t\tAVAILABLE TIME SLOTS FOR " << MONTH << endl;
+    CENTER << CYAN << "AVAILABLE TIME SLOTS FOR " << MONTH << RESET << endl;
 
     cout << "==========================================================================================================================================\n";
     cout << setw(12) << left << "DAY"
@@ -886,7 +917,7 @@ void printSchedule() {
             }
             cout << endl;
         }
-        counter ++;
+        counter++;
         if (counter == 5) {
             counter = 0;
             pauseEnter();
@@ -895,7 +926,8 @@ void printSchedule() {
         cout << "------------------------------------------------------------------------------------------------------------------------------------------\n";
     }
 
-    cout << GREEN << "A = AVAILABLE\t" << YELLOW << "B = BOOKED\t" << RED << "C = CLOSED\n\n" << RESET;
+    CENTER << GREEN << "A = AVAILABLE\t" << YELLOW << "B = BOOKED\t" << RED << "C = CLOSED\n\n" << RESET;
+    cout << "\n";
     pauseEnter();
 }
 
@@ -906,7 +938,7 @@ void feedbackForm(string username, string currentPassword) {
     ofstream feedbackFile("feedback.dat", ios::app); // Open in append mode
 
     if (!feedbackFile) {
-        cout << "Error: Could not open feedback file.\n";
+        cout << RED << "\t\tError: Could not open feedback file.\n";
         pauseEnter();
         customerPage(username, currentPassword);
         return;
@@ -914,19 +946,19 @@ void feedbackForm(string username, string currentPassword) {
 
     string name;
     string feedback;
-    cout << "-----------------Feedback Form-----------------\n";
-    cout << "Enter your name: ";
+    cout << CYAN << "--------------------------------------------FEEDBACK FORM--------------------------------------------------\n\n" << RESET;
+    cout << "\t\tEnter your name: ";
     getline(cin, name);
-    cout << "Please enter your feedback:\n";
+    cout << "\t\tPlease enter your feedback: ";
     getline(cin, feedback);  // Get feedback from customer
 
     // Save feedback to file
     feedbackFile << "Customer Name: " << name << endl;
     feedbackFile << "Feedback: " << feedback << endl;
-    feedbackFile << "------------------------------------------\n";
+    feedbackFile << "------------------------------------------------------------------------------------------------------------\n";
     feedbackFile.close();
 
-    cout << "Thank you for your feedback!\n";
+    cout << "\t\tThank you for your feedback!\n";
     pauseEnter();
     customerPage(username, currentPassword);
 }
@@ -934,7 +966,7 @@ void feedbackForm(string username, string currentPassword) {
 // Ask confirm logout and go to main menu
 void customerLogout(string username, string currentPassword) {
     char confirmLogout = 'Y';
-    cout << "\nDo you wish to log out? (Y/N):\t";
+    cout << "\n\t\tDo you wish to log out? (Y/N):\t";
     cin >> confirmLogout;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     if (toupper(confirmLogout) == 'Y') {
@@ -950,11 +982,11 @@ template<size_t N>
 int getChoice(const array<string, N>& options) {
     int choice;
     for (size_t i = 0; i < options.size(); ++i) {
-        cout << i + 1 << ". " << options[i] << endl;
+        CENTER << i + 1 << ". " << options[i] << endl;
     }
-    cout << "Enter your choice: ";
+    CENTER << "Enter your choice: ";
     while (!(cin >> choice) || choice < 1 || choice > options.size()) {
-        cout << "Invalid choice. Please enter a number between 1 and " << options.size() << ": ";
+        cout << RED << "\t\tInvalid choice. Please enter a number between 1 and " << options.size() << ": ";
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
@@ -962,6 +994,7 @@ int getChoice(const array<string, N>& options) {
     return choice;
 }
 
+// Customer > Make Booking > Select Service
 // Customer > Make Booking > Select Service
 int selectService() {
     newPageLogo();
@@ -982,9 +1015,10 @@ int selectService() {
     array<double, 4> prices;
 
     // Display header
-    cout << "------------------------------------------" << endl;
-    cout << setw(30) << left << "Service" << setw(10) << "Price (RM)" << endl;
-    cout << "------------------------------------------" << endl;
+    cout << CYAN << "\t\t---------------------------------------------SELECT AN SERVICE-----------------------------------------------\n\n" << RESET;
+    CENTER << "------------------------------------------" << endl;
+    CENTER << setw(30) << left << "Service" << setw(10) << "Price (RM)" << endl;
+    CENTER << "------------------------------------------" << endl;
 
     // Read services and prices from the file and store them
     while (inFile >> ws && getline(inFile, service, ' ') && inFile >> price && count < 4) {
@@ -992,13 +1026,13 @@ int selectService() {
         prices[count] = price;
 
         // Display the service and price
-        cout << setw(30) << left << service << setw(10) << right << fixed << setprecision(2) << price << endl;
+        CENTER << setw(30) << left << service << setw(10) << right << fixed << setprecision(2) << price << endl;
         count++;
     }
 
     inFile.close();
-    cout << "------------------------------------------" << endl;
-    cout << "Please select a service you want to book:" << endl;
+    CENTER << "------------------------------------------" << endl;
+    CENTER << "Please select a service you want to book:" << endl;
 
     // Let the user choose a service
     int choice = getChoice(services);
@@ -1006,21 +1040,49 @@ int selectService() {
 }
 
 void printCalendar() {
-    cout << "MON TUE WED THU FRI SAT SUN";
-    //for (i = 0, i < MONDAY)
+    CENTER << "MON TUE WED THU FRI SAT SUN\n";
+
+    // Assuming each week starts from a specific day (e.g., Monday = 1)
+    int startDay = MONDAY;  // 0-based for Monday
+    int currentDay = 1;
+
+    // Add padding for the start day
+    CENTER;
+    for (int i = 0; i < startDay; ++i) {
+        cout << "    "; // Space for days before the 1st
+    }
+
+    // Print all the days of the month
+    while (currentDay <= MAX_DAYS) {
+        cout << setw(3) << currentDay << " "; // Width to space days out
+
+        startDay++; // Move to the next day
+        currentDay++;
+
+        // Start a new line after Sunday (6th index)
+        if (startDay % 7 == 0) {
+            cout << endl;
+            CENTER;
+        }
+    }
+    cout << endl; // Final new line at the end of the calendar
 }
+
+
 
 // Customer > Make Booking >  Select Date
 int selectDate() {
     newPageLogo();
+    cout << CYAN << "\t\t---------------------------------------------SELECT A DATE-----------------------------------------------\n\n" << RESET;
+    CENTER << "--------SELECT A DAY IN " << MONTH << "--------\n\n";
+    printCalendar();  // Print the calendar in the center
 
-    cout << "--------SELECT A DAY IN " << MONTH << "--------\n\n";
-    printCalendar();
-    int day = 1;
-    cout << "\n\nEnter a day (1-31): ";
+    int day;
+    // Manually center the input prompt
+    cout << setw(76) << "Enter a day (1-31): "; // Adjust the number in setw() as needed for your console width
     cin >> day;
 
-    return day; // Return the selected date
+    return day;
 }
 
 // Customer > Make Booking > Select Timeslot
@@ -1032,48 +1094,45 @@ int selectTimeSlot(int service) {
     const string* timeSlots;
     int availableSlots = 0;
 
-    // Select the appropriate time slots based on the service
     if (service == 3) { // Consultation service
-        cout << "--------SELECT A TIME SLOT (Consultation)--------\n";
-        timeSlots = consultTimeSlots.data();  // Point to consultation time slots
+        CENTER << "--------SELECT A TIME SLOT (Consultation)--------\n";
+        timeSlots = consultTimeSlots.data();
         availableSlots = static_cast<int>(consultTimeSlots.size());
     }
     else {
-        cout << "--------SELECT A TIME SLOT--------\n";
-        timeSlots = treatmentTimeSlots.data();  // Point to regular time slots
+        cout << CYAN << "\t\t---------------------------------------------SELECT A TIMESLOT-----------------------------------------------\n\n" << RESET;
+        timeSlots = treatmentTimeSlots.data();
         availableSlots = static_cast<int>(treatmentTimeSlots.size());
     }
 
-    // Display available time slots
     for (int i = 0; i < availableSlots; ++i) {
-        cout << i + 1 << ". " << timeSlots[i] << endl;
+        CENTER << i + 1 << ". " << timeSlots[i] << endl;
     }
 
-    // Input validation
     int choice;
-    cout << "Enter your choice: ";
+    CENTER << "Enter your choice: ";
     while (!(cin >> choice) || choice < 1 || choice > availableSlots) {
         cout << "Invalid choice. Please enter a number between 1 and " << availableSlots << ": ";
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
     }
-
-    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     return choice - 1;
 }
+
 // Customer > Make Booking > Select Expert
 int selectExpert(int day, int timeslot, int service) {
     newPageLogo();
     array<string, 4> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan", "Auto-assign" };
 
-    cout << "--------SELECT AN EXPERT--------\n";
+    cout << CYAN << "\t\t---------------------------------------------SELECT AN EXPERT-----------------------------------------------\n\n" << RESET;
     int choice = getChoice(experts);
 
     // If user selects auto-assign option
     if (choice == 4) {
         int assignedExpert = autoAssignExpert(day, timeslot, DURATION[service]);  // Use the modified autoAssignExpert to check availability
         if (assignedExpert != -1) {
-            cout << "Expert " << EXPERT[assignedExpert] << " has been auto-assigned.\n";
+            cout << "\t\tExpert " << EXPERT[assignedExpert] << " has been auto-assigned.\n";
             pauseEnter();
             return assignedExpert;
         }
@@ -1085,6 +1144,7 @@ int selectExpert(int day, int timeslot, int service) {
     // Return selected expert index (adjust for array offset)
     return choice - 1;
 }
+
 // Customer > Make Booking > Select Expert (random assign expert function)
 int autoAssignExpert(int day, int timeslot, int hour) {
     array<string, 3> experts = { "Alice Wong", "Bernice Lim", "Catherine Tan" };
@@ -1108,102 +1168,102 @@ int autoAssignExpert(int day, int timeslot, int hour) {
     }
     else {
         // No available experts
-        cout << "No available expert for the selected time slot." << endl;
+        cout << RED << "\t\tNo available expert for the selected time slot." << endl;
         pauseEnter();
         return -1;  // Indicate no expert is available
     }
 }
+
 // Customer > Make Booking > Select Payment Mode
 int selectPaymentMode() {
     newPageLogo();
     array<string, 3> paymentModes = { "Credit Card", "Debit Card", "Cash" };
-    cout << "--------SELECT A PAYMENT MODE--------\n";
+    cout << CYAN << "\t\t------------------------------------------SELECT A PAYMENT MODE--------------------------------------------\n\n" << RESET;
     int choice = getChoice(paymentModes);
+    cout << GREEN << "\n\t\tPayment method selected: " << paymentModes[choice - 1] << RESET << endl;
     return choice - 1;
 }
 
 // Customer > Make Booking
 void makeBooking(string username, string currentPassword) {
-    int service, expert, week, day, timeSlot, paymentMode;
+    int service, expert, day, timeSlot, paymentMode;
 
     // Use the username as the customer name
     string customerName = username;
 
-    service = selectService();       // Choose a service
-    if (service == -1) { // Error in selecting service
-        cout << RED << "Error in selecting service.\n";
+    // Step 1: Select a service
+    service = selectService();
+    if (service == -1) {
+        cout << RED << "\t\tError in selecting service.\n";
         pauseEnter();
         customerPage(username, currentPassword);
         return;
     }
 
-    day = selectDate();
+    // Step 2: Select a date directly (no need for week selection)
+    day = selectDate();  // This will let the user pick a day in the month
 
-    // Validate the day
-    if (day > MAX_DAYS) {
-        cout << "Invalid day selected. Returning to customer page.\n";
-        pauseEnter();
-        customerPage(username, currentPassword);
-        return;
-    }
+    // Step 3: Select a time slot based on the selected service
+    timeSlot = selectTimeSlot(service);
 
-    timeSlot = selectTimeSlot(service); // Choose a time slot
-    // convert 0,1,2,3 to 0, 2, 4
-    /*if (DURATION[service] == 2) {
-        timeSlot *= 2;
-        cout << timeSlot;
-    }*/
-
-    bool isConsultation = (service == 3); // Check if it's a consultation
-
-    expert = selectExpert(day, timeSlot, service); // Select expert
+    // Step 4: Select an expert or auto-assign
+    expert = selectExpert(day, timeSlot, service);
     if (expert == -1) {
-        // If no available expert, return to customer page
         pauseEnter();
         customerPage(username, currentPassword);
         return;
     }
 
-    paymentMode = selectPaymentMode(); // Choose payment method
+    // Step 5: Select payment mode
+    paymentMode = selectPaymentMode();
 
+    // Step 6: Check availability and finalize booking
     bool available = checkBookingAvailable(day, timeSlot, expert, DURATION[service]);
 
     if (available) {
-        char confirm;
-        cout << "Booking Summary:\n";
-        cout << "\nUsername:\t" << customerName;
-        cout << "\nDay:\t\t" << formatDate(day); // Updated Line
-        if (isConsultation) {
-            cout << "\nTime Slot:\t" << TIMESLOT_CONSULT[timeSlot];
-        }
-        else {
-            cout << "\nTime Slot:\t" << TREATMENT_TIMESLOT[timeSlot];
-        }
+        // Create a new booking
+        bookingType newBooking = { customerName, day, timeSlot, expert, service, COST[service], paymentMode };
 
-        cout << "\nService:\t" << SERVICE[service];
-        cout << "\nExpert:\t\t" << EXPERT[expert];
-        cout << "\nCost:\t\tRM " << fixed << setprecision(2) << COST[service];
-        cout << "\nPayment Method:\t" << PAYMENTMODE[paymentMode];
-        cout << "\n\nConfirm your booking (Y/N): ";
-        cin >> confirm;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear the input buffer
-
-        if (confirm == 'Y' || confirm == 'y') {
-            bookingType newBooking = { customerName, day, timeSlot, expert, service, COST[service], paymentMode };
-            saveBookingToFile(newBooking);
-            generateReceipt(newBooking); // Generate the receipt
-            cout << "Your booking has been confirmed!\n";
-        }
-        else {
-            cout << "Booking canceled.\n";
-        }
+        // Display booking summary and confirm
+        displayBookingSummary(newBooking);
     }
     else {
-        cout << "Sorry, the selected slot is not available.\n";
+        cout << RED << "\t\tSorry, the selected slot is not available.\n";
     }
-    pauseEnter();
     customerPage(username, currentPassword);
 }
+
+
+void displayBookingSummary(const bookingType& booking) {
+    cout << CYAN << "\n\t\t-----------------------------------------BOOKING SUMMARY---------------------------------------------------\n\n" << RESET;
+    CENTER << setw(15) << left << "Username:" << "\t" << booking.customerName << endl;
+    CENTER << setw(15) << left << "Day:" << "\t" << formatDate(booking.day) << endl;
+    CENTER << setw(15) << left << "Time Slot:" << "\t" << (booking.service == 3 ? TIMESLOT_CONSULT[booking.timeslot] : TREATMENT_TIMESLOT[booking.timeslot]) << endl;
+    CENTER << setw(15) << left << "Service:" << "\t" << SERVICE[booking.service] << endl;
+    CENTER << setw(15) << left << "Expert:" << "\t" << EXPERT[booking.expert] << endl;
+    CENTER << setw(15) << left << "Cost:" << "\tRM " << fixed << setprecision(2) << COST[booking.service] << endl;
+    CENTER << setw(15) << left << "Payment Method:" << "\t" << PAYMENTMODE[booking.payment_mode] << endl;
+
+    cout << CYAN << "\n\t\t-----------------------------------------------------------------------------------------------------------\n" << RESET;
+
+    // Confirm Booking
+    char confirm;
+    CENTER << "Confirm your booking (Y/N): ";
+    cin >> confirm;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+    if (toupper(confirm) == 'Y') {
+        saveBookingToFile(booking);
+        generateReceipt(booking); // Ensure receipt is generated correctly
+        cout << GREEN << "\t\tYour booking has been confirmed!\n" << RESET;
+        cout << YELLOW << "\t\tReceipt has been saved to 'receipt.txt'.\n" << RESET;
+    }
+    else {
+        cout << RED << "\t\tBooking canceled.\n" << RESET;
+    }
+
+    pauseEnter();
+}
+
 
 // Function to generate a printable receipt
 void generateReceipt(const bookingType& booking) {
@@ -1239,23 +1299,24 @@ void generateReceipt(const bookingType& booking) {
 
     receiptFile.close();  // Close the file after appending the receipt
 
-    cout << "Receipt has been saved to 'receipt.txt'.\n";
+    cout << "\t\tReceipt has been saved to 'receipt.txt'.\n";
 }
+
 
 // ADMIN LOGIN
 void adminLogin() {
     bool loop = true;
     do {
         newPageLogo();
-        cout << "\nADMIN LOGIN";
+        cout << CYAN << "\n\t\t----------------------------------------------ADMIN LOGIN---------------------------------------------------\n" << RESET;
         string inputUsername = "", inputPassword = "";
-        cout << "\nEnter your username:\t";
+        cout << "\n\t\t\tEnter your username:\t";
         getline(cin, inputUsername);
-        cout << "\nEnter your password:\t";
-        getline(cin, inputPassword);
+        cout << "\n\t\t\tEnter your password:\t";
+        inputPassword = getPasswordInput();
 
         if (inputUsername == "havensadmin" && inputPassword == "haven1234") {
-            cout << GREEN << "\n\nAccess granted\n";
+            cout << GREEN << "\n\n\t\tAccess granted\n";
             loop = false;
             pauseEnter();
             adminPage(inputUsername);
@@ -1263,7 +1324,7 @@ void adminLogin() {
         }
         else {
             char option;
-            cout << RED << "\n\nAccess denied\n" << RESET << "Do you wish to retry? (Y/N):\t";
+            cout << RED << "\n\n\t\tAccess denied\n" << RESET << "\t\tDo you wish to retry? (Y/N):\t";
             cin >> option;
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             loop = (toupper(option) == 'Y') ? true : false;
@@ -1276,17 +1337,17 @@ void adminLogin() {
 void adminPage(string username) {
     char option;
     newPageLogo();
-    cout << "--------ADMIN HOMEPAGE--------\n";
-    cout << "Welcome " << username << endl;
-    cout << "Please choose your option.\n";
+    cout << CYAN << "\t\t------------------------------------------ADMIN HOMEPAGE--------------------------------------------------\n\n" << RESET;
+    CENTER << "Welcome " << username << endl;
+    CENTER << "Please choose your option.\n";
 
-    cout << "A\t: View Customer Bookings\n";
-    cout << "B\t: View Sales Record\n";
-    cout << "C\t: View Expert Booking Slot\n";
-    cout << "D\t: View Feedback Form\n";
-    cout << "E\t: Log Out and Return to Main Menu\n\n";
+    CENTER << "A\t: View Customer Bookings\n";
+    CENTER << "B\t: View Sales Record\n";
+    CENTER << "C\t: View Expert Booking Slot\n";
+    CENTER << "D\t: View Feedback Form\n";
+    CENTER << "E\t: Log Out and Return to Main Menu\n\n";
 
-    cout << "Enter your choice:\t";
+    CENTER << "Enter your choice:\t";
     cin >> option;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -1311,7 +1372,7 @@ void adminPage(string username) {
         adminLogout(username);
         break;
     default:
-        cout << "\nInvalid option, Please try again!\n";
+        cout << RED << "\n\t\tInvalid option, Please try again!\n";
         pauseEnter();
         adminPage(username); // Return to admin page for a retry
     }
@@ -1320,32 +1381,34 @@ void adminPage(string username) {
 // Admin > View Customer Bookings
 void viewCustomerBookings(string username) {
     newPageLogo();
+    char option;
+    char option2;
 
     int lenBookings = 0;
     bookingType* bookingsArray = readBookingsFile(lenBookings);
 
     if (bookingsArray == nullptr) {
-        cout << "No customer bookings available (file error or empty).\n";
+        cout << RED << "\t\tNo customer bookings available (file error or empty).\n";
         pauseEnter();
         return;
     }
 
     // Display table headers
-    cout << "\t\t\t\t\t\tView Customer Bookings\n";
-    cout << "==========================================================================================================================================\n";
-    cout << setw(4) << left << "No"
+    CENTER << CYAN << "VIEW CUSTOMER BOOKINGS\n" << RESET;
+    cout << "\t==========================================================================================================================================\n";
+    cout << "\t" << setw(4) << left << "No"
         << setw(20) << left << "Customer Name"
-        << setw(15) << left << "Day" // Adjusted Width
+        << setw(15) << left << "Date" // Adjusted Width
         << setw(25) << left << "Time Slot"
         << setw(20) << left << "Expert"
-        << setw(20) << left << "Service"
+        << setw(22) << left << "Service"
         << setw(10) << left << "Cost(RM)"
         << setw(15) << left << "Payment Mode" << endl;
-    cout << "==========================================================================================================================================\n";
+    cout << "\t==========================================================================================================================================\n";
 
     // Loop through the bookings array and display each booking
     for (int i = 0; i < lenBookings; i++) {
-        cout << setw(4) << left << i + 1
+        cout << "\t" << setw(4) << left << i + 1
             << setw(20) << left << bookingsArray[i].customerName  // Display the customer name
             << setw(15) << left << formatDate(bookingsArray[i].day); // Updated Line
 
@@ -1358,18 +1421,19 @@ void viewCustomerBookings(string username) {
         }
 
         cout << setw(20) << left << EXPERT[bookingsArray[i].expert]
-            << setw(20) << left << SERVICE[bookingsArray[i].service]
+            << setw(22) << left << SERVICE[bookingsArray[i].service]
             << setw(10) << left << fixed << setprecision(2) << bookingsArray[i].cost
             << setw(15) << left << PAYMENTMODE[bookingsArray[i].payment_mode] << endl;
     }
 
     if (lenBookings == 0) {
-        cout << "No customer bookings found.\n";
+        cout << RED << "\tNo customer bookings found.\n" << RESET;
     }
 
-    cout << "==========================================================================================================================================\n";
+    cout << "\t==========================================================================================================================================\n\n";
     pauseEnter();
     adminPage(username);
+
 }
 
 // Admin > View Sales Record
@@ -1380,28 +1444,29 @@ void viewSalesRecord(string username) {
     bookingType* bookingsArray = readBookingsFile(lenBookings);
 
     if (bookingsArray == nullptr || lenBookings == 0) {
-        cout << RED << "Error: Could not retrieve booking data." << endl;
+        cout << RED << "\t\tError: Could not retrieve booking data." << endl;
         pauseEnter();
         return;
     }
 
     double totalSales = 0;
-    cout << "===============SALES RECORD===================\n";
-    cout << left << setw(10) << "Day" << setw(25) << "Service" << setw(15) << "Cost (RM)" << endl;
-    cout << "==============================================\n";
+    CENTER << CYAN << "\tSALES RECORD FOR " << MONTH << RESET << endl;
+    CENTER << "==============================================\n";
+    CENTER << left << setw(10) << "Date" << setw(25) << "Service" << setw(15) << "Cost (RM)" << endl;
+    CENTER << "==============================================\n";
 
     // Loop through all bookings and calculate total sales
     for (int i = 0; i < lenBookings; i++) {
         totalSales += bookingsArray[i].cost;
 
-        cout << left << setw(10) << bookingsArray[i].day
+        CENTER << left << setw(10) << formatDate(bookingsArray[i].day)
             << setw(25) << SERVICE[bookingsArray[i].service]
             << setw(15) << fixed << setprecision(2) << bookingsArray[i].cost << endl;
     }
 
-    cout << "==============================================\n";
-    cout << "Total Sales: RM " << fixed << setprecision(2) << totalSales << endl;
-
+    CENTER << "==============================================\n";
+    CENTER << "Total Sales: RM " << fixed << setprecision(2) << totalSales << endl;
+    cout << "\n";
     pauseEnter();
     adminPage(username);
 }
@@ -1412,6 +1477,7 @@ void viewBookingSlot(string username) {
     adminPage(username);
 }
 
+
 // Admin > View Feedback (Reads and displays all feedback entries)
 void viewFeedbackForm(string username) {
     newPageLogo();
@@ -1419,29 +1485,27 @@ void viewFeedbackForm(string username) {
     ifstream feedbackFile("feedback.dat");
 
     if (!feedbackFile) {
-        cout << RED << "Error: Could not open feedback file.\n";
+        cout << RED << "\t\tError: Could not open feedback file.\n";
         pauseEnter();
         adminPage(username);
         return;
     }
 
     string line;
-    cout << "---------------------FEEDBACK ENTRIES---------------------\n";
+    cout << CYAN << "\t\t---------------------------------------------FEEDBACK ENTRIES---------------------------------------------\n\n" << RESET;
 
     bool feedbackExists = false;
 
     while (getline(feedbackFile, line)) {
-        cout << line << endl;  // Display each line from the feedback file
+        cout << "\t\t" << line << endl;  // Display each line from the feedback file
         feedbackExists = true;
     }
 
     feedbackFile.close();
 
     if (!feedbackExists) {
-        cout << "No feedback available.\n";
+        cout << RED << "\t\tNo feedback available.\n";
     }
-
-    cout << "\n---------------------------------------------------------\n";
     pauseEnter();
     adminPage(username);
 }
@@ -1449,7 +1513,8 @@ void viewFeedbackForm(string username) {
 // Ask confirm logout and go to main menu
 void adminLogout(string username) {
     char confirmLogout = 'Y';
-    cout << "\nDo you wish to log out? (Y/N):\t";
+    cout << "\n\t\tDo you wish to log out? (Y/N):\t";
+    //cin >> confirmLogout;
     cin >> confirmLogout;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     if (toupper(confirmLogout) == 'Y') {
