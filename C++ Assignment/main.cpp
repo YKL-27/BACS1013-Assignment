@@ -631,7 +631,7 @@ void customerPage(string username, string currentPassword) {
         customerLogout(username, currentPassword);
         break;
     default:
-        cout << RED << "\t\tnvalid option, Please try again!\n" << RESET;
+        cout << RED << "\t\tInvalid option, Please try again!\n" << RESET;
         pauseEnter();
         customerPage(username, currentPassword); // Return to customer page for a retry
     }
@@ -683,10 +683,13 @@ void mybookingsDetail(string username, string currentPassword) {
                 userBookings[bookingCount] = bookingsArray[i];
                 bookingIndices[bookingCount] = i;
                 cout << "\t" << setw(4) << left << bookingCount + 1
-                    << setw(15) << left << formatDate(bookingsArray[i].day) // Updated Line
-
-                    << setw(25) << left
-                    << (bookingsArray[i].service == 3 ? TIMESLOT_CONSULT[bookingsArray[i].timeslot] : TREATMENT_TIMESLOT[bookingsArray[i].timeslot]);
+                    << setw(15) << left << formatDate(bookingsArray[i].day); // Updated Line
+                if (bookingsArray[i].service == 3) {  // Styling Consultation (1-hour slots)
+                    cout << setw(25) << left << TIMESLOT_CONSULT[bookingsArray[i].timeslot];  // Display consultation time slot
+                    }
+                else {  // Other services (2-hour slots)
+                        cout << setw(25) << left << TREATMENT_TIMESLOT[bookingsArray[i].timeslot / 2];  // Display treatment time slot
+                    }
 
                 cout << setw(20) << left << EXPERT[bookingsArray[i].expert]
                     << setw(20) << left << SERVICE[bookingsArray[i].service]
@@ -1435,7 +1438,7 @@ void viewCustomerBookings(string username) {
             cout << setw(25) << left << TIMESLOT_CONSULT[bookingsArray[i].timeslot];  // Display consultation time slot
         }
         else {  // Other services (2-hour slots)
-            cout << setw(25) << left << TREATMENT_TIMESLOT[bookingsArray[i].timeslot];  // Display treatment time slot
+            cout << setw(25) << left << TREATMENT_TIMESLOT[bookingsArray[i].timeslot/2];  // Display treatment time slot
         }
 
         cout << setw(20) << left << EXPERT[bookingsArray[i].expert]
