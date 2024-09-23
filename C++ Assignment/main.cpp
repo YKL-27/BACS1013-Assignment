@@ -305,7 +305,6 @@ bool isValidPassword(const string& password) {
 void addNewUserToFile(userType new_user) {
     // Create a record in CSV-like format
     string record = new_user.username + ',' + new_user.password;
-    // cout << record << endl;  // Display the record for debugging (commented out)
 
     ofstream outFile(FILE_USERS, ios::app); // Open file in append mode
 
