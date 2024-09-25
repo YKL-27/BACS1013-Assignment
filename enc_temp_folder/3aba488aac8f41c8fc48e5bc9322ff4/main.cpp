@@ -1314,6 +1314,8 @@ void generateReceipt(const bookingType& booking) {
     receiptFile << "==================================================================\n\n";  // Add extra newlines to separate receipts
 
     receiptFile.close();  // Close the file after appending the receipt
+
+    cout << "\t\tReceipt has been saved to 'receipt.txt'.\n";
 }
 
 // ADMIN LOGIN
