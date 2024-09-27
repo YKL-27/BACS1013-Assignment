@@ -640,11 +640,6 @@ string formatDate(int day) {
     return to_string(day) + "/" + MONTH; // Formats as "dd-mm-yyyy"
 }
 
-// Helper Function to Get Full Date with Day Name
-string getFullDate(int day) {
-    return getDayName(day) + ", " + formatDate(day); // e.g., "Monday, 1-10-2024"
-}
-
 // Customer > My Bookings (Display all bookings made by the current user)
 void mybookingsDetail(string username, string currentPassword) {
     char option;
